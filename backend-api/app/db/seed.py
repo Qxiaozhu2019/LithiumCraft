@@ -2,10 +2,55 @@ from sqlalchemy.orm import Session
 
 from app.models.category import Category
 from app.models.daily_brief import DailyBrief
-from app.models.source import Source
+from app.models.source import Source, SourceStatus, SourceType
 from app.models.setting import SystemSetting
 
 DEFAULT_CATEGORIES = ["企业动态", "政策监管", "价格材料", "设备工艺", "产能项目", "技术路线", "投融资", "专利论文", "行业快讯"]
+
+DEFAULT_SOURCES = [
+    {
+        "name": "工业和信息化部 - 政策公告",
+        "type": SourceType.policy,
+        "entry_url": "https://www.miit.gov.cn/zwgk/zcwj/wjfb/gg/index.html",
+        "domain": "www.miit.gov.cn",
+        "notes": "官方公开政策公告候选源；默认仅手动抓取，确认 robots 和页面结构后再启用每日抓取。",
+    },
+    {
+        "name": "国家发展改革委 - 通知公告",
+        "type": SourceType.policy,
+        "entry_url": "https://www.ndrc.gov.cn/xxgk/zcfb/tz/",
+        "domain": "www.ndrc.gov.cn",
+        "notes": "官方公开政策候选源，关注产业政策、价格和新型储能相关通知；默认仅手动抓取。",
+    },
+    {
+        "name": "国家能源局 - 能源要闻",
+        "type": SourceType.policy,
+        "entry_url": "https://www.nea.gov.cn/xwzx/nyyw.htm",
+        "domain": "www.nea.gov.cn",
+        "notes": "官方公开能源资讯候选源，关注储能、电力系统和能源政策；默认仅手动抓取。",
+    },
+    {
+        "name": "自然资源部 - 要闻播报",
+        "type": SourceType.announcement,
+        "entry_url": "https://www.mnr.gov.cn/dt/ywbb/",
+        "domain": "www.mnr.gov.cn",
+        "notes": "官方公开资源资讯候选源，关注锂矿、资源政策和矿产信息；默认仅手动抓取。",
+    },
+    {
+        "name": "中国储能网 - 锂离子电池",
+        "type": SourceType.media,
+        "entry_url": "https://www.escn.com.cn/news/700-4.html",
+        "domain": "www.escn.com.cn",
+        "notes": "行业媒体候选源，关注锂离子电池与储能应用；默认仅手动抓取，确认转载和展示边界后再启用。",
+    },
+    {
+        "name": "电池中国网 - 行业资讯",
+        "type": SourceType.media,
+        "entry_url": "https://www.cbea.com/",
+        "domain": "www.cbea.com",
+        "notes": "行业媒体候选源，关注动力电池、材料和企业动态；默认仅手动抓取，确认合规后再启用。",
+    },
+]
 
 
 def seed_defaults(db: Session) -> None:
@@ -20,12 +65,19 @@ def seed_defaults(db: Session) -> None:
     if not db.query(SystemSetting).filter(SystemSetting.key == "sensitive_words").first():
         db.add(SystemSetting(key="sensitive_words", value="", description="逗号分隔的敏感词"))
 
-    db.query(Source).filter(
-        Source.name == "示例禁用来源",
-        Source.domain == "example.com",
-    ).delete(synchronize_session=False)
-    db.query(DailyBrief).filter(
-        DailyBrief.title == "今日锂电投研摘要",
-        DailyBrief.overview == "暂无新增情报。",
-    ).delete(synchronize_session=False)
+    for source_data in DEFAULT_SOURCES:
+        source = db.query(Source).filter(Source.entry_url == source_data["entry_url"]).first()
+        if source is None:
+            db.add(
+                Source(
+                    **source_data,
+                    status=SourceStatus.manual_only,
+                    parser_key="generic",
+                    crawl_interval_minutes=1440,
+                    domain_delay_seconds=5,
+                    max_pages_per_run=10,
+                    daily_limit=20,
+                )
+            )
+
     db.commit()

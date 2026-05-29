@@ -1,4 +1,6 @@
 from app.core.config import settings
+from app.models.source import Source, SourceStatus, SourceType
+from app.services.crawlers.compliance import ComplianceChecker
 from app.tasks import celery_app
 
 
@@ -27,3 +29,15 @@ def test_beat_schedule_contains_crawl_and_daily_brief_tasks() -> None:
     )
     assert schedule["generate-daily-brief-every-evening"]["schedule"]._orig_hour == 7
     assert schedule["generate-daily-brief-every-evening"]["schedule"]._orig_minute == 30
+
+
+def test_manual_only_source_can_be_manually_validated_without_auto_enabling() -> None:
+    source = Source(
+        name="默认候选来源",
+        type=SourceType.webpage,
+        entry_url="https://example.org/news",
+        domain="example.org",
+        status=SourceStatus.manual_only,
+    )
+
+    assert ComplianceChecker().validate_source(source).allowed is True

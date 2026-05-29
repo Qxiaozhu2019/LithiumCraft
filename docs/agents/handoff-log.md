@@ -73,3 +73,19 @@
 - 验证结果：`C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m pytest tests -q -o cache_dir=C:\Users\admin\AppData\Local\Temp\lithiumcraft-pytest-cache` 通过，7 passed；`C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m ruff check app tests --config line-length=100 --no-cache` 通过；`npm run build` 通过，仍有 Rollup pure annotation 和大 chunk 警告。
 - 遗留问题：Docker Compose 真实启动仍受本机 Docker CLI 可用性限制，已拆为 `LC-009`；真实来源仍需人工合规确认后再启用。
 - 下一步建议：在有 Docker CLI 的环境完成 `LC-009` 全栈启动验收；之后通过管理端新增真实中文公开来源，先禁用、手动测试、再启用每日抓取。
+
+## 2026-05-29 13:10 - Coordinator Agent
+
+- 领取任务：按用户要求补充默认候选来源。
+- 完成内容：在 `backend-api/app/db/seed.py` 增加 6 个真实中文公开候选来源，默认状态为 `manual_only`；`manual_only` 可由管理员单来源手动抓取测试，但不会进入每天 7 点“全部启用来源”自动抓取；更新 README、合规和开发文档。
+- 验证结果：待运行后端测试、前端构建，并将默认来源写入当前 `lithiumcraft-dev.db`。
+- 遗留问题：候选来源仍需管理员逐个确认 robots、网站条款和页面结构后，再改为 `enabled`。
+- 下一步建议：在来源管理页选择单个 `manual_only` 来源手动抓取，确认日志与入库结果后再启用。
+
+## 2026-05-29 13:20 - Coordinator Agent
+
+- 领取任务：记录本地开发热重启要求。
+- 完成内容：更新 `docs/development.md`，后端启动命令增加 `--reload`；明确后端 Python 代码变更自动重启、前端 Vite dev server 自动热更新，后续不要因普通代码修改反复开关 CMD。
+- 验证结果：已用 `--reload` 重新启动后端，`/health` 返回 200；前端按 Vite dev server 命令常驻启动。
+- 遗留问题：只有 `.env`、启动命令、依赖安装或端口异常等非代码变更才需要手动重启服务。
+- 下一步建议：以后本地联调一律保持两个 CMD 常驻，后端用 `--reload`，前端用 Vite dev server；普通代码改动后等待热重启/热更新完成即可。

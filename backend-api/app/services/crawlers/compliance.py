@@ -20,7 +20,7 @@ class ComplianceChecker:
         self._last_request_at: dict[str, float] = {}
 
     def validate_source(self, source: Source) -> ComplianceResult:
-        if source.status == SourceStatus.enabled:
+        if source.status in {SourceStatus.enabled, SourceStatus.manual_only}:
             return ComplianceResult(True)
         return ComplianceResult(False, f"source_{source.status.value}")
 

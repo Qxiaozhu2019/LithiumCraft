@@ -11,13 +11,13 @@
 
 ### 推荐：分别启动前后端开发服务
 
-在 Windows 本地联调时，优先使用两个可见的 CMD 窗口分别常驻运行后端和前端。不要关闭这两个窗口；关闭后对应服务会停止。
+在 Windows 本地联调时，优先使用两个可见的 CMD 窗口分别常驻运行后端和前端。不要关闭这两个窗口；关闭后对应服务会停止。后端必须带 `--reload` 启动；前端使用 Vite dev server 并固定 `--host 0.0.0.0 --port 5173 --strictPort`，Vite 会自动热更新。后续代码修改后让服务自动热重启/热更新，不要反复手动开关 CMD。
 
 后端 API：
 
 ```bat
 cd /d E:\工作目录\97_AILearning\11_LithiumCraft\backend-api
-set DATABASE_URL=sqlite:///./lithiumcraft-dev.db&& set CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173&& C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+set DATABASE_URL=sqlite:///./lithiumcraft-dev.db&& set CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173&& C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 前端工作台：
@@ -42,6 +42,8 @@ netstat -ano | findstr 8000
 - 默认管理员：`admin` / `ChangeMe123!`
 
 前端开发服务已在 `frontend-app/vite.config.ts` 中配置 `/api` 代理到 `http://127.0.0.1:8000`，因此登录请求会从 `http://localhost:5173/api/v1/auth/login` 转发到本地后端。
+
+后端 `--reload` 会在 Python 文件变更后自动重启；前端 Vite dev server 会在 Vue/TypeScript/CSS 变更后自动热更新页面。只有 `.env`、启动命令、依赖安装或端口异常这类非代码变更，才需要手动重启对应 CMD。
 
 ### 后台抓取进程
 
@@ -91,7 +93,7 @@ cd /d E:\工作目录\97_AILearning\11_LithiumCraft\frontend-app
 1. 确认来源公开可访问且合规。
 2. 检查 `robots.txt` 和网站使用条款。
 3. 配置来源类型、URL、域名、频率和上限。
-4. 先禁用自动抓取，手动触发一次测试。
+4. 默认候选来源使用 `manual_only`，可手动测试但不会参与每天 7 点“全部启用来源”自动抓取。
 5. 检查抓取日志、入库条目和 blocked 原因。
 6. 确认无异常后启用来源。
 
