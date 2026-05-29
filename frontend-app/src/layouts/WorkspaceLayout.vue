@@ -64,8 +64,6 @@
       </RouterLink>
       <nav class="portal-nav">
         <RouterLink to="/">首页</RouterLink>
-        <RouterLink to="/intelligence">资讯</RouterLink>
-        <RouterLink to="/daily-briefs">简报</RouterLink>
       </nav>
       <RouterLink class="portal-login" to="/login">管理登录</RouterLink>
     </header>

@@ -5,45 +5,11 @@
         <p class="eyebrow">Lithium News</p>
         <h1>锂电资讯</h1>
         <p class="home-hero-summary">追踪公开来源中的产业政策、材料工艺、储能应用与企业动态，只展示经过合规检查的信息。</p>
-        <div class="home-hero-actions">
-          <RouterLink class="home-hero-link home-hero-link-primary" to="/intelligence">查看最新资讯</RouterLink>
-          <RouterLink class="home-hero-link" to="/daily-briefs">阅读每日简报</RouterLink>
-        </div>
-      </div>
-
-      <aside class="home-status-card" aria-label="更新状态">
-        <span class="home-status-label">更新状态</span>
-        <strong>每日 07:00</strong>
-        <p>自动读取已确认的公开来源，管理员也可在后台手动更新。</p>
-        <div class="home-status-meta">
-          <span>公开来源</span>
-          <span>合规过滤</span>
-          <span>摘要优先</span>
-        </div>
-      </aside>
-    </section>
-
-    <section class="home-info-strip" aria-label="信息概览">
-      <div>
-        <span>更新节奏</span>
-        <strong>每日 07:00</strong>
-      </div>
-      <div>
-        <span>公开来源</span>
-        <strong>已确认来源</strong>
-      </div>
-      <div>
-        <span>合规过滤</span>
-        <strong>robots 与规则检查</strong>
-      </div>
-      <div>
-        <span>最近更新</span>
-        <strong>{{ latestUpdatedText }}</strong>
       </div>
     </section>
 
-    <section class="home-content-grid">
-      <div class="home-main-column">
+    <div class="home-flow">
+      <section class="home-section">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Latest Updates</p>
@@ -84,10 +50,10 @@
           <strong>暂无资讯</strong>
           <p>等待每日 07:00 自动更新，或管理员登录后手动更新。</p>
         </div>
-      </div>
+      </section>
 
-      <aside class="home-side-column">
-        <div class="section-heading compact">
+      <section class="home-section">
+        <div class="section-heading">
           <div>
             <p class="eyebrow">Daily Brief</p>
             <h2>每日简报</h2>
@@ -104,15 +70,15 @@
         </div>
         <div v-else class="home-empty-state compact">
           <strong>暂无简报</strong>
-          <p>更新完成后将生成每日信息概览。</p>
+          <p>更新完成后将生成每日简报。</p>
         </div>
+      </section>
 
-        <div class="home-compliance-card">
-          <strong>内容边界</strong>
-          <p>仅展示公开来源中的摘要、链接和必要说明，不绕过登录、付费墙、验证码或 robots 限制。</p>
-        </div>
-      </aside>
-    </section>
+      <section class="home-compliance-card">
+        <strong>内容边界</strong>
+        <p>仅展示公开来源中的摘要、链接和必要说明，不绕过登录、付费墙、验证码或 robots 限制。公开内容页可继续查看完整列表和历史简报。</p>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -128,21 +94,14 @@ const latest = ref<IntelligenceItem[]>([]);
 const briefs = ref<DailyBrief[]>([]);
 
 const headline = computed(() => latest.value[0] ?? null);
-const secondaryItems = computed(() => latest.value.slice(1, 7));
-const latestUpdatedText = computed(() => {
-  const first = latest.value[0];
-  if (!first) {
-    return "等待更新";
-  }
-  return formatDateTime(first.source_published_at || first.crawled_at);
-});
+const secondaryItems = computed(() => latest.value.slice(1, 10));
 
 async function refresh() {
   loading.value = true;
   try {
     const [allLatest, briefPage] = await Promise.all([
-      listIntelligence({ page_size: 7 }),
-      listDailyBriefs(1, 4)
+      listIntelligence({ page_size: 10 }),
+      listDailyBriefs(1, 5)
     ]);
     latest.value = allLatest.items;
     briefs.value = briefPage.items;
