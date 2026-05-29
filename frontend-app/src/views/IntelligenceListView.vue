@@ -1,6 +1,6 @@
 <template>
   <div class="page-stack">
-    <PageHeader eyebrow="Intelligence" title="情报列表" description="按关键词、分类与状态筛选公开来源沉淀的内部情报。" />
+    <PageHeader eyebrow="Information" title="资讯列表" description="按关键词、分类与日期筛选公开来源沉淀的信息。" />
 
     <el-card class="panel-card" shadow="never">
       <el-form class="filter-bar" :model="filters" inline>
@@ -97,7 +97,7 @@ async function load(targetPage = page.value) {
     items.value = result.items;
     total.value = result.total;
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "情报列表加载失败");
+    ElMessage.error(err instanceof Error ? err.message : "资讯列表加载失败");
   } finally {
     loading.value = false;
   }

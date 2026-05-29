@@ -2,8 +2,8 @@
   <main class="login-screen">
     <section class="login-hero">
       <p class="eyebrow">LithiumCraft MVP</p>
-      <h1>把锂电工艺、产业链与政策信号收拢到一张工作台。</h1>
-      <p>登录后访问内部情报、每日摘要、来源策略和抓取日志。</p>
+      <h1>锂电资讯后台管理入口。</h1>
+      <p>登录后维护公开来源、更新任务、系统参数和每日简报。</p>
       <div class="signal-board">
         <span>公开来源</span>
         <span>低频抓取</span>
@@ -27,7 +27,7 @@
           <el-input v-model="form.password" size="large" type="password" autocomplete="current-password" show-password placeholder="请输入密码" @keyup.enter="submit" />
         </el-form-item>
         <el-alert v-if="error" :title="error" type="error" show-icon :closable="false" />
-        <el-button class="login-button" type="primary" size="large" :loading="loading" @click="submit">进入工作台</el-button>
+        <el-button class="login-button" type="primary" size="large" :loading="loading" @click="submit">进入后台</el-button>
       </el-form>
     </el-card>
   </main>

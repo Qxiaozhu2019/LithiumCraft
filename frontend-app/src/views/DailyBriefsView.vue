@@ -1,6 +1,6 @@
 <template>
   <div class="page-stack">
-    <PageHeader eyebrow="Daily Brief" title="每日摘要" description="按日期查看 AI 生成的情报聚合与分类摘要。">
+    <PageHeader eyebrow="Daily Brief" title="每日简报" description="按日期查看公开资讯聚合与分类摘要。">
       <template v-if="authStore.isAuthenticated.value">
         <el-date-picker v-model="targetDate" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" />
         <el-button type="primary" :loading="generating" @click="generate">生成摘要</el-button>
@@ -97,7 +97,7 @@ async function load(targetPage = page.value) {
     total.value = result.total;
     selected.value = selected.value || result.items[0] || null;
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "每日摘要加载失败");
+    ElMessage.error(err instanceof Error ? err.message : "每日简报加载失败");
   } finally {
     loading.value = false;
   }
