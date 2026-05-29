@@ -94,7 +94,7 @@ cd /d E:\工作目录\97_AILearning\11_LithiumCraft\frontend-app
 2. 检查 `robots.txt` 和网站使用条款。
 3. 配置来源类型、URL、域名、频率和上限。
 4. 默认候选来源使用 `manual_only`，可手动测试但不会参与每天 7 点“全部启用来源”自动抓取。
-5. 检查抓取日志、入库条目和 blocked 原因。
+5. 检查抓取日志、入库条目和 blocked 原因；如果错误为 `robots_disallow`，来源会自动标记为 `blocked_by_policy`，并应从默认候选列表删除。
 6. 确认无异常后启用来源。
 
 ## 提交规范

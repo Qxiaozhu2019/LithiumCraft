@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.crawl_task import CrawlTask, TaskStatus
 from app.models.intelligence import IntelligenceItem, IntelligenceStatus
-from app.models.source import Source
+from app.models.source import Source, SourceStatus
 from app.services.ai import AIAdapter
 from app.services.crawlers import crawl_source
 from app.services.publish import PublishGuard
@@ -70,6 +70,9 @@ def run_source_crawl(db: Session, source_id: int, task_type: str = "scheduled_cr
         db.rollback()
         source.failure_count += 1
         source.last_error = str(exc)
+        if source.last_error == "robots_disallow":
+            source.status = SourceStatus.blocked_by_policy
+            source.notes = "robots.txt 禁止抓取，已自动标记为禁止策略状态。"
         task.status = TaskStatus.failed
         task.error_message = str(exc)
     finally:

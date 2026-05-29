@@ -148,3 +148,48 @@ def test_manual_crawl_endpoint_runs_without_redis(monkeypatch) -> None:
     assert payload["status"] == "success"
     assert payload["fetched_count"] == 1
     assert payload["inserted_count"] + payload["blocked_count"] == 1
+
+
+def test_robots_disallow_marks_source_blocked_by_policy(monkeypatch) -> None:
+    from app.services import crawl_runner
+
+    def raise_robots_disallow(source: Source) -> list[object]:
+        raise ValueError("robots_disallow")
+
+    monkeypatch.setattr(crawl_runner, "crawl_source", raise_robots_disallow)
+
+    with TestClient(app) as client:
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"username": "admin", "password": "ChangeMe123!"},
+        )
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        with SessionLocal() as db:
+            source = Source(
+                name="robots 禁止测试来源",
+                type=SourceType.webpage,
+                entry_url="https://example.com/robots-disallow",
+                domain="example.com",
+                status=SourceStatus.enabled,
+            )
+            db.add(source)
+            db.commit()
+            db.refresh(source)
+            source_id = source.id
+
+        response = client.post(
+            "/api/v1/crawl-tasks",
+            params={"source_id": source_id},
+            headers=headers,
+        )
+
+        with SessionLocal() as db:
+            updated = db.get(Source, source_id)
+            assert updated is not None
+            assert updated.status == SourceStatus.blocked_by_policy
+            assert updated.last_error == "robots_disallow"
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "failed"

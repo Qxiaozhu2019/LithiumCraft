@@ -4,7 +4,17 @@ from app.models.category import Category
 from app.models.source import Source, SourceStatus, SourceType
 from app.models.setting import SystemSetting
 
-DEFAULT_CATEGORIES = ["企业动态", "政策监管", "价格材料", "设备工艺", "产能项目", "技术路线", "投融资", "专利论文", "行业快讯"]
+DEFAULT_CATEGORIES = [
+    "企业动态",
+    "政策监管",
+    "价格材料",
+    "设备工艺",
+    "产能项目",
+    "技术路线",
+    "投融资",
+    "专利论文",
+    "行业快讯",
+]
 
 DEFAULT_SOURCES = [
     {
@@ -43,12 +53,16 @@ DEFAULT_SOURCES = [
         "notes": "行业媒体候选源，关注锂离子电池与储能应用；默认仅手动抓取，确认转载和展示边界后再启用。",
     },
     {
-        "name": "电池中国网 - 行业资讯",
+        "name": "中国电力企业联合会 - 新闻中心",
         "type": SourceType.media,
-        "entry_url": "https://www.cbea.com/",
-        "domain": "www.cbea.com",
-        "notes": "行业媒体候选源，关注动力电池、材料和企业动态；默认仅手动抓取，确认合规后再启用。",
+        "entry_url": "https://www.cec.org.cn/detail/index.html?3-12",
+        "domain": "www.cec.org.cn",
+        "notes": "公开行业资讯候选源，关注电力系统、新型储能和能源转型；默认仅手动抓取，确认合规后再启用。",
     },
+]
+
+REMOVED_DEFAULT_SOURCE_URLS = [
+    "https://www.cbea.com/",
 ]
 
 
@@ -79,4 +93,12 @@ def seed_defaults(db: Session) -> None:
                 )
             )
 
+    for entry_url in REMOVED_DEFAULT_SOURCE_URLS:
+        source = db.query(Source).filter(Source.entry_url == entry_url).first()
+        if source is not None:
+            db.delete(source)
+
+    for source in db.query(Source).filter(Source.last_error == "robots_disallow").all():
+        source.status = SourceStatus.blocked_by_policy
+        source.notes = "robots.txt 禁止抓取，已自动标记为禁止策略状态。"
     db.commit()
