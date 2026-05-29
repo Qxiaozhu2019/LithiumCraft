@@ -1,6 +1,6 @@
 <template>
   <div class="page-stack">
-    <PageHeader eyebrow="Lithium News" title="锂电资讯门户" description="聚合公开来源中的产业政策、材料工艺、储能应用与企业动态，只展示经过合规检查的信息。">
+    <PageHeader eyebrow="Lithium News" title="锂电资讯" description="聚合公开来源中的产业政策、材料工艺、储能应用与企业动态，只展示经过合规检查的信息。">
       <el-button type="primary" @click="refresh" :loading="loading">刷新信息</el-button>
     </PageHeader>
 
@@ -74,7 +74,7 @@ async function refresh() {
     latest.value = allLatest.items;
     briefs.value = briefPage.items;
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "门户信息加载失败");
+    ElMessage.error(err instanceof Error ? err.message : "信息加载失败");
   } finally {
     loading.value = false;
   }
