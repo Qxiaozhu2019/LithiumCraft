@@ -47,7 +47,7 @@ netstat -ano | findstr 8000
 
 ### 后台抓取进程
 
-手动抓取和每日 7 点自动抓取依赖 Redis、Celery worker 和 Celery beat。只验证页面和 API 时可以先不启动；需要真实入队和执行抓取时需额外启动。
+手动抓取不依赖 Redis/Celery，会在管理员点击后由 API 进程同步执行并写入抓取日志。每天 7 点自动抓取依赖 Redis、Celery worker 和 Celery beat；只验证页面、API 和手动抓取时可以先不启动后台队列。
 
 Redis 可使用本机服务或 Docker，例如：
 

@@ -89,3 +89,11 @@
 - 验证结果：已用 `--reload` 重新启动后端，`/health` 返回 200；前端按 Vite dev server 命令常驻启动。
 - 遗留问题：只有 `.env`、启动命令、依赖安装或端口异常等非代码变更才需要手动重启服务。
 - 下一步建议：以后本地联调一律保持两个 CMD 常驻，后端用 `--reload`，前端用 Vite dev server；普通代码改动后等待热重启/热更新完成即可。
+
+## 2026-05-29 13:35 - Coordinator Agent
+
+- 领取任务：按用户决定将手动抓取改为不依赖 Redis。
+- 完成内容：`POST /api/v1/crawl-tasks` 改为 API 进程内同步执行单来源抓取并写入抓取日志；`POST /api/v1/crawl-tasks/enabled` 同步执行全部 `enabled` 来源；Celery Beat 的自动抓取仍保留给 Docker/Redis 部署环境；更新前端提示和 API/开发文档。
+- 验证结果：待运行后端测试、ruff、前端构建，并通过页面手动触发确认抓取日志。
+- 遗留问题：手动抓取会占用 API 请求时间，适合本地和低频管理操作；大规模自动抓取仍应使用 Docker Redis + Celery worker/beat。
+- 下一步建议：管理员先对 `manual_only` 候选来源单个手动抓取测试，确认结果后再改为 `enabled`。

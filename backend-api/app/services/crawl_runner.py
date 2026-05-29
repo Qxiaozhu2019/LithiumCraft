@@ -13,12 +13,17 @@ from app.services.publish import PublishGuard
 from app.services.text import normalize_title
 
 
-def run_source_crawl(db: Session, source_id: int) -> CrawlTask:
+def run_source_crawl(db: Session, source_id: int, task_type: str = "scheduled_crawl") -> CrawlTask:
     source = db.get(Source, source_id)
     if source is None:
         raise ValueError("source_not_found")
 
-    task = CrawlTask(source_id=source.id, status=TaskStatus.running, started_at=datetime.now(timezone.utc))
+    task = CrawlTask(
+        task_type=task_type,
+        source_id=source.id,
+        status=TaskStatus.running,
+        started_at=datetime.now(timezone.utc),
+    )
     db.add(task)
     db.commit()
     db.refresh(task)

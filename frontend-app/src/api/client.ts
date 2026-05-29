@@ -159,14 +159,22 @@ export function listCrawlTasks(page = 1, pageSize = 20) {
 }
 
 export function triggerCrawl(sourceId: number) {
-  return apiRequest<{ task_id: string; source_id: number; message: string }>("/crawl-tasks", {
+  return apiRequest<{
+    task_id: number;
+    source_id: number;
+    status: string;
+    fetched_count: number;
+    inserted_count: number;
+    blocked_count: number;
+    message: string;
+  }>("/crawl-tasks", {
     method: "POST",
     params: { source_id: sourceId }
   });
 }
 
 export function triggerEnabledSourcesCrawl() {
-  return apiRequest<{ task_id: string; message: string }>("/crawl-tasks/enabled", {
+  return apiRequest<{ source_count: number; tasks: Array<{ task_id: number; status: string }>; message: string }>("/crawl-tasks/enabled", {
     method: "POST"
   });
 }

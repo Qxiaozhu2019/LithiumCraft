@@ -26,8 +26,8 @@
 - `POST /api/v1/sources`：新增来源。
 - `PATCH /api/v1/sources/{id}`：修改来源或启停。
 - `GET /api/v1/crawl-tasks`：抓取任务日志。
-- `POST /api/v1/crawl-tasks`：手动触发单来源抓取，接口只负责 Celery 入队。
-- `POST /api/v1/crawl-tasks/enabled`：手动触发全部启用来源抓取，接口只负责 Celery 入队。
+- `POST /api/v1/crawl-tasks`：手动触发单来源抓取；本地和管理端同步执行，不依赖 Redis。
+- `POST /api/v1/crawl-tasks/enabled`：手动触发全部启用来源抓取；同步执行所有 `enabled` 来源，不包含 `manual_only` 候选来源。
 - `GET /api/v1/settings`：系统设置。
 - `PATCH /api/v1/settings`：更新系统设置。
 
@@ -35,7 +35,7 @@
 
 - `app.tasks.crawl.crawl_enabled_sources`：每天 `Asia/Shanghai 07:00` 执行。
 - `app.tasks.daily_brief.generate_daily_brief`：每天 `Asia/Shanghai 07:30` 执行。
-- 手动抓取接口不在 API 进程同步访问外部站点，只提交后台任务。
+- 自动抓取由 Celery/Redis 在部署环境执行；手动抓取为了本地管理便利，在 API 进程同步执行并写入抓取日志。
 
 ## 状态值
 

@@ -23,7 +23,7 @@ def _serialize_crawl_task(task: CrawlTask) -> dict[str, Any]:
 @celery_app.task(name="app.tasks.crawl.crawl_source")
 def crawl_source_task(source_id: int) -> dict[str, Any]:
     with SessionLocal() as db:
-        task = run_source_crawl(db, source_id)
+        task = run_source_crawl(db, source_id, task_type="celery_manual_crawl")
         return _serialize_crawl_task(task)
 
 
@@ -41,7 +41,7 @@ def crawl_enabled_sources_task() -> dict[str, Any]:
     results = []
     for source_id in source_ids:
         with SessionLocal() as db:
-            task = run_source_crawl(db, source_id)
+            task = run_source_crawl(db, source_id, task_type="scheduled_crawl")
             results.append(_serialize_crawl_task(task))
 
     return {"source_count": len(source_ids), "tasks": results}

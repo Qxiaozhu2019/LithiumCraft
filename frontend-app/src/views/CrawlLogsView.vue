@@ -66,8 +66,8 @@ async function trigger() {
   if (!selectedSource.value) return;
   triggering.value = true;
   try {
-    await triggerCrawl(selectedSource.value);
-    ElMessage.success("抓取任务已入队");
+    const result = await triggerCrawl(selectedSource.value);
+    ElMessage.success(`抓取完成：抓取 ${result.fetched_count} 条，入库 ${result.inserted_count} 条，拦截 ${result.blocked_count} 条`);
     await loadTasks(1);
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "触发失败");
@@ -79,8 +79,8 @@ async function trigger() {
 async function triggerAll() {
   triggeringAll.value = true;
   try {
-    await triggerEnabledSourcesCrawl();
-    ElMessage.success("全部启用来源抓取任务已入队");
+    const result = await triggerEnabledSourcesCrawl();
+    ElMessage.success(`全部启用来源抓取完成：${result.source_count} 个来源`);
     await loadTasks(1);
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : "触发全部来源失败");

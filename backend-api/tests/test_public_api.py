@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from app.db.session import SessionLocal
 from app.main import app
 from app.models.intelligence import IntelligenceItem, IntelligenceStatus
+from app.models.source import Source, SourceStatus, SourceType
 
 
 def test_public_readonly_endpoints_do_not_require_login() -> None:
@@ -96,3 +97,54 @@ def test_public_intelligence_only_exposes_active_items() -> None:
     assert "公开隐藏情报" not in titles
     assert blocked_detail_response.status_code == 404
     assert active_detail_response.status_code == 200
+
+
+def test_manual_crawl_endpoint_runs_without_redis(monkeypatch) -> None:
+    from app.services import crawl_runner
+    from app.services.crawlers.base import CrawledItem
+
+    monkeypatch.setattr(
+        crawl_runner,
+        "crawl_source",
+        lambda source: [
+                CrawledItem(
+                    title="手动抓取公开情报唯一标题",
+                    url="https://example.com/manual-crawl-item-unique",
+                    content="手动抓取公开情报内容，包含足够长的正文用于通过发布检查。",
+                )
+        ],
+    )
+
+    with TestClient(app) as client:
+        login_response = client.post(
+            "/api/v1/auth/login",
+            json={"username": "admin", "password": "ChangeMe123!"},
+        )
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        with SessionLocal() as db:
+            source = Source(
+                name="手动抓取测试来源",
+                type=SourceType.webpage,
+                entry_url="https://example.com/manual-crawl",
+                domain="example.com",
+                status=SourceStatus.manual_only,
+            )
+            db.add(source)
+            db.commit()
+            db.refresh(source)
+            source_id = source.id
+
+        response = client.post(
+            "/api/v1/crawl-tasks",
+            params={"source_id": source_id},
+            headers=headers,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["message"] == "manual_crawl_finished"
+    assert payload["status"] == "success"
+    assert payload["fetched_count"] == 1
+    assert payload["inserted_count"] + payload["blocked_count"] == 1

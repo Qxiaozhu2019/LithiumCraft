@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 
 from app.models.category import Category
-from app.models.daily_brief import DailyBrief
 from app.models.source import Source, SourceStatus, SourceType
 from app.models.setting import SystemSetting
 
