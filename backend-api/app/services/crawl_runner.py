@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone
+from datetime import datetime, timezone
 from time import perf_counter
 
 from sqlalchemy.exc import IntegrityError

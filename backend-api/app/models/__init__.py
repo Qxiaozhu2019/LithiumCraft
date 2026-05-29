@@ -1,4 +1,4 @@
-﻿from app.models.category import Category
+from app.models.category import Category
 from app.models.crawl_task import CrawlTask
 from app.models.daily_brief import DailyBrief
 from app.models.intelligence import IntelligenceItem

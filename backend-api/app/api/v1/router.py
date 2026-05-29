@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter
+from fastapi import APIRouter
 
 from app.api.v1 import auth, categories, crawl_tasks, daily_briefs, intelligence, settings, sources
 

@@ -1,4 +1,4 @@
-﻿# LithiumCraft 内部投研情报台实施计划
+# LithiumCraft 内部投研情报台实施计划
 
 > **给 agentic workers：** 实施本计划时必须使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans`，并按任务逐项执行。步骤使用 checkbox（`- [ ]`）语法跟踪进度。
 
@@ -51,18 +51,20 @@
   - AI 适配器第一期使用 deterministic stub，输出摘要、标签、分类、重要性评分。
   - 抓取结果入内部情报库，异常内容标记为 `blocked`。
 
-- [ ] **Task 4: 每日摘要任务**
+- [x] **Task 4: 每日摘要任务**
   - Celery Beat 每日生成 `DailyBrief`。
   - 每日摘要包含总览、重点条目和分类摘要。
   - 首次启动的示例来源保持 disabled，避免自动访问外部网站。
 
-- [ ] **Task 5: Vue 统一工作台**
+- [x] **Task 5: Vue 统一工作台**
   - 创建登录页、仪表盘、情报列表、情报详情、每日摘要、来源管理、抓取日志、系统设置。
   - 未登录自动跳转登录；API client 统一附加 Bearer token。
+  - 已安装前端依赖并通过 `npm run build`。
 
 - [ ] **Task 6: Docker 部署与验证**
   - Docker Compose 启动 `api`、`worker`、`beat`、`frontend`、`postgres`、`redis`、`nginx`。
   - 验证 `/health`、OpenAPI、登录页、API 鉴权、数据库持久化。
+  - Compose、Dockerfile、Nginx 和备份脚本已创建；待 Docker CLI 环境运行完整验证。
 
 ---
 

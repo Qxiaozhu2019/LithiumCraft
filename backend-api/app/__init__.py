@@ -1,1 +1,1 @@
-﻿"""LithiumCraft backend package."""
+"""LithiumCraft backend package."""

@@ -1,4 +1,4 @@
-﻿# Execution Board
+# Execution Board
 
 > 本文件是 agentic workers 的轻量任务看板。领取任务前先更新状态，完成后同步 `docs/agents/handoff-log.md`。
 
@@ -14,9 +14,6 @@
 
 | ID | 任务 | 建议 Agent | 验收要点 |
 | --- | --- | --- | --- |
-| LC-004 | 补齐 Celery 任务目录与每日摘要调度 | Crawler & AI Agent | Beat 可调度抓取与每日摘要，示例来源默认 disabled |
-| LC-005 | 创建 Vue 3 内部工作台 | Frontend Agent | 登录、仪表盘、情报、每日摘要、来源、日志、设置页面可路由访问 |
-| LC-006 | 添加 Docker Compose 与 Nginx | Deployment Agent | 本地可启动完整服务，入口和 API 代理清晰 |
 | LC-007 | 补齐后端测试与端到端验收 | QA & Docs Agent | pytest、前端构建和 Compose 验证结果可复现 |
 
 ## In Progress
@@ -30,6 +27,7 @@
 | ID | 任务 | Owner | 待验证内容 |
 | --- | --- | --- | --- |
 | LC-002 | 后端 API 骨架与服务初稿 | Previous Codex | 需要运行后端测试并核对计划任务状态 |
+| LC-006 | 添加 Docker Compose 与 Nginx | Deployment Agent | 需要 Docker CLI 环境运行 `docker compose config/up --build` |
 
 ## Done
 
@@ -37,6 +35,8 @@
 | --- | --- | --- | --- |
 | LC-001 | 项目基础文档、环境模板和后端目录初稿 | 2026-05-29 | 已创建 README、docs 基础文档、`.env.example`、`backend-api` 初始代码 |
 | LC-003 | 创建 agents 协作文档并更新实施计划 | 2026-05-29 | 已新增 agents 三份协作文档并更新实施计划 |
+| LC-004 | 补齐 Celery 任务目录与每日摘要调度 | 2026-05-29 | 已创建 Celery app、抓取任务、每日摘要任务和任务注册测试 |
+| LC-005 | 创建 Vue 3 内部工作台 | 2026-05-29 | 已创建 Vue 工作台并通过 `npm run build` |
 
 ## Blocked
 

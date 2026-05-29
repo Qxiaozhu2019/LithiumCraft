@@ -1,4 +1,4 @@
-﻿[project]
+[project]
 name = "lithiumcraft-backend"
 version = "0.1.0"
 description = "LithiumCraft internal intelligence backend"

@@ -1,4 +1,4 @@
-﻿from app.models.source import Source, SourceType
+from app.models.source import Source, SourceType
 from app.services.crawlers.base import CrawledItem
 from app.services.crawlers.rss import RssCrawler
 from app.services.crawlers.web import GenericWebCrawler

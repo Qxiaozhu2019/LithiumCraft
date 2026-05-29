@@ -1,4 +1,4 @@
-﻿from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 from app.models.source import Source
 from app.services.crawlers.base import CrawledItem

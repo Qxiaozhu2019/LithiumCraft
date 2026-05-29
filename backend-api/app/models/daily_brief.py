@@ -1,4 +1,4 @@
-﻿from datetime import date, datetime
+from datetime import date, datetime
 from enum import StrEnum
 
 from sqlalchemy import Date, DateTime, Enum, Integer, String, Text, UniqueConstraint

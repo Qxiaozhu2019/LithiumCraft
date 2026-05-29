@@ -1,4 +1,4 @@
-﻿from dataclasses import dataclass
+from dataclasses import dataclass
 
 from rapidfuzz import fuzz
 from sqlalchemy.orm import Session
