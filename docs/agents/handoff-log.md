@@ -57,3 +57,11 @@
 - 验证结果：以前端 `npm run build` 通过为准；本地浏览器访问由用户人工确认。
 - 遗留问题：Docker CLI 仍不可用，LC-006 仍需后续 Compose 真实启动验证。
 - 下一步建议：提交并推送当前多 agent 集成结果。
+
+## 2026-05-29 11:55 - Coordinator Agent
+
+- 领取任务：记录稳定的本地前后端启动方式。
+- 完成内容：在 `docs/development.md` 增加 Windows 本地联调推荐流程：两个可见 CMD 窗口分别常驻运行后端 `uvicorn` 与前端 Vite；记录验证端口、访问地址和默认管理员；在 `frontend-app/vite.config.ts` 保留 `/api` 到 `127.0.0.1:8000` 的开发代理；在 `.gitignore` 忽略本地 SQLite 数据库文件。
+- 验证结果：此前已验证 `http://127.0.0.1:8000/health`、`/api/v1/auth/login` 和 `http://127.0.0.1:5173/` 均返回 200。
+- 遗留问题：本地开发数据库 `backend-api/lithiumcraft-dev.db` 仅用于临时联调，不提交；Docker Compose 完整启动仍需有 Docker CLI 的环境验证。
+- 下一步建议：后续本地调试都按 `docs/development.md` 的“推荐：分别启动前后端开发服务”执行。

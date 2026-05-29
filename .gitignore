@@ -29,6 +29,9 @@ logs/
 postgres-data/
 redis-data/
 backups/
+*.db
+*.sqlite
+*.sqlite3
 
 # OS/editor
 .DS_Store
