@@ -5,6 +5,7 @@
         <el-option v-for="source in sources" :key="source.id" :label="source.name" :value="source.id" />
       </el-select>
       <el-button type="primary" :disabled="!selectedSource" :loading="triggering" @click="trigger">手动触发</el-button>
+      <el-button type="success" :loading="triggeringAll" @click="triggerAll">抓取全部启用来源</el-button>
     </PageHeader>
 
     <el-card class="panel-card" shadow="never">
@@ -31,7 +32,7 @@
 import { ElMessage } from "element-plus";
 import { onMounted, ref } from "vue";
 
-import { listCrawlTasks, listSources, triggerCrawl } from "@/api/client";
+import { listCrawlTasks, listSources, triggerCrawl, triggerEnabledSourcesCrawl } from "@/api/client";
 import type { CrawlTask, Source } from "@/api/types";
 import PageHeader from "@/components/PageHeader.vue";
 import StatusPill from "@/components/StatusPill.vue";
@@ -39,6 +40,7 @@ import { formatDate } from "@/utils/format";
 
 const loading = ref(false);
 const triggering = ref(false);
+const triggeringAll = ref(false);
 const tasks = ref<CrawlTask[]>([]);
 const sources = ref<Source[]>([]);
 const selectedSource = ref<number>();
@@ -71,6 +73,19 @@ async function trigger() {
     ElMessage.error(err instanceof Error ? err.message : "触发失败");
   } finally {
     triggering.value = false;
+  }
+}
+
+async function triggerAll() {
+  triggeringAll.value = true;
+  try {
+    await triggerEnabledSourcesCrawl();
+    ElMessage.success("全部启用来源抓取任务已入队");
+    await loadTasks(1);
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "触发全部来源失败");
+  } finally {
+    triggeringAll.value = false;
   }
 }
 

@@ -60,7 +60,7 @@ async function submit() {
   try {
     await authStore.login(form.username, form.password);
     ElMessage.success("登录成功");
-    router.replace(String(route.query.redirect || "/dashboard"));
+    router.replace(String(route.query.redirect || "/admin/crawl-logs"));
   } catch (err) {
     error.value = err instanceof Error ? err.message : "登录失败";
   } finally {

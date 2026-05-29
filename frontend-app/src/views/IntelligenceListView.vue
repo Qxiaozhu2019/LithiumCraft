@@ -12,7 +12,7 @@
             <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.name" />
           </el-select>
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item v-if="authStore.isAuthenticated.value" label="状态">
           <el-select v-model="filters.status" clearable placeholder="全部状态" style="width: 150px">
             <el-option label="可用" value="active" />
             <el-option label="拦截" value="blocked" />
@@ -46,7 +46,7 @@
         <el-table-column label="重要性" width="120">
           <template #default="{ row }">{{ Math.round(row.importance_score * 100) }}%</template>
         </el-table-column>
-        <el-table-column label="状态" width="100">
+        <el-table-column v-if="authStore.isAuthenticated.value" label="状态" width="100">
           <template #default="{ row }"><StatusPill :status="row.status" /></template>
         </el-table-column>
         <el-table-column label="抓取时间" width="180">
@@ -70,6 +70,7 @@ import { listCategories, listIntelligence } from "@/api/client";
 import type { Category, IntelligenceItem, IntelligenceStatus } from "@/api/types";
 import PageHeader from "@/components/PageHeader.vue";
 import StatusPill from "@/components/StatusPill.vue";
+import { authStore } from "@/stores/auth";
 import { formatDate, splitTags } from "@/utils/format";
 
 const router = useRouter();

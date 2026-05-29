@@ -24,14 +24,14 @@
         </el-col>
         <el-col :xs="24" :lg="8">
           <el-card class="panel-card" shadow="never">
-            <template #header>操作与属性</template>
+            <template #header>{{ authStore.isAuthenticated.value ? "操作与属性" : "情报属性" }}</template>
             <el-descriptions :column="1" border>
               <el-descriptions-item label="分类">{{ item.category }}</el-descriptions-item>
               <el-descriptions-item label="标签">{{ splitTags(item.tags).join(" / ") || "无" }}</el-descriptions-item>
               <el-descriptions-item label="重要性">{{ Math.round(item.importance_score * 100) }}%</el-descriptions-item>
               <el-descriptions-item label="抓取时间">{{ formatDate(item.crawled_at) }}</el-descriptions-item>
             </el-descriptions>
-            <div class="action-stack">
+            <div v-if="authStore.isAuthenticated.value" class="action-stack">
               <el-button v-if="item.status !== 'archived'" type="warning" @click="changeStatus('archived')">归档</el-button>
               <el-button v-if="item.status !== 'active'" type="success" @click="changeStatus('active')">恢复可用</el-button>
               <el-button v-if="item.status !== 'blocked'" type="danger" plain @click="changeStatus('blocked')">标记拦截</el-button>
@@ -53,6 +53,7 @@ import { getIntelligence, updateIntelligence } from "@/api/client";
 import type { IntelligenceItem, IntelligenceStatus } from "@/api/types";
 import PageHeader from "@/components/PageHeader.vue";
 import StatusPill from "@/components/StatusPill.vue";
+import { authStore } from "@/stores/auth";
 import { formatDate, splitTags } from "@/utils/format";
 
 const props = defineProps<{ id: string }>();

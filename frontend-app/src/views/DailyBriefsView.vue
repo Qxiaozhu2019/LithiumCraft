@@ -1,8 +1,10 @@
 <template>
   <div class="page-stack">
     <PageHeader eyebrow="Daily Brief" title="每日摘要" description="按日期查看 AI 生成的情报聚合与分类摘要。">
-      <el-date-picker v-model="targetDate" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" />
-      <el-button type="primary" :loading="generating" @click="generate">生成摘要</el-button>
+      <template v-if="authStore.isAuthenticated.value">
+        <el-date-picker v-model="targetDate" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" />
+        <el-button type="primary" :loading="generating" @click="generate">生成摘要</el-button>
+      </template>
     </PageHeader>
 
     <el-row :gutter="20">
@@ -56,6 +58,7 @@ import { generateDailyBrief, listDailyBriefs } from "@/api/client";
 import type { DailyBrief } from "@/api/types";
 import PageHeader from "@/components/PageHeader.vue";
 import StatusPill from "@/components/StatusPill.vue";
+import { authStore } from "@/stores/auth";
 import { formatDate } from "@/utils/format";
 
 const loading = ref(false);

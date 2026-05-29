@@ -3,7 +3,7 @@
 ## 目录约定
 
 - `backend-api`：后端 API、Celery、模型、服务、测试。
-- `frontend-app`：统一 Vue 内部工作台。
+- `frontend-app`：Vue 前台首页与管理工作台。
 - `deploy`：Docker Compose、Nginx、备份脚本。
 - `docs`：中文项目文档。
 
@@ -36,11 +36,36 @@ netstat -ano | findstr 8000
 
 访问地址：
 
-- 前端工作台：`http://localhost:5173`
+- 公开首页：`http://localhost:5173`
+- 管理入口：`http://localhost:5173/admin/crawl-logs`
 - 后端健康检查：`http://127.0.0.1:8000/health`
 - 默认管理员：`admin` / `ChangeMe123!`
 
 前端开发服务已在 `frontend-app/vite.config.ts` 中配置 `/api` 代理到 `http://127.0.0.1:8000`，因此登录请求会从 `http://localhost:5173/api/v1/auth/login` 转发到本地后端。
+
+### 后台抓取进程
+
+手动抓取和每日 7 点自动抓取依赖 Redis、Celery worker 和 Celery beat。只验证页面和 API 时可以先不启动；需要真实入队和执行抓取时需额外启动。
+
+Redis 可使用本机服务或 Docker，例如：
+
+```bat
+docker run --name lithiumcraft-redis -p 6379:6379 redis:7-alpine
+```
+
+Celery worker（Windows 建议使用 `solo` pool）：
+
+```bat
+cd /d E:\工作目录\97_AILearning\11_LithiumCraft\backend-api
+set DATABASE_URL=sqlite:///./lithiumcraft-dev.db&& set REDIS_URL=redis://127.0.0.1:6379/0&& C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m celery -A app.tasks.celery_app.celery_app worker --loglevel=info --pool=solo
+```
+
+Celery beat：
+
+```bat
+cd /d E:\工作目录\97_AILearning\11_LithiumCraft\backend-api
+set DATABASE_URL=sqlite:///./lithiumcraft-dev.db&& set REDIS_URL=redis://127.0.0.1:6379/0&& C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m celery -A app.tasks.celery_app.celery_app beat --loglevel=info
+```
 
 ### Docker Compose
 
@@ -51,7 +76,15 @@ docker compose -f deploy/docker-compose.yml --env-file .env up --build
 
 ## 测试
 
-后端使用 pytest。前端使用 TypeScript 构建检查。提交前至少运行后端测试和前端构建。
+后端使用 pytest。前端使用 TypeScript 构建检查。提交前至少运行：
+
+```bat
+cd /d E:\工作目录\97_AILearning\11_LithiumCraft\backend-api
+C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m pytest tests -q -o cache_dir=C:\Users\admin\AppData\Local\Temp\lithiumcraft-pytest-cache
+C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m ruff check app tests --config line-length=100 --no-cache
+cd /d E:\工作目录\97_AILearning\11_LithiumCraft\frontend-app
+"C:\Program Files\nodejs\npm.cmd" run build
+```
 
 ## 新增来源流程
 

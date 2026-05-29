@@ -10,7 +10,7 @@
 - 每次只领取 `docs/agents/execution-board.md` 中一个明确任务，开始前把任务移动到 `In Progress`。
 - 任务完成后更新执行板和 `docs/agents/handoff-log.md`，说明完成内容、验证结果、遗留风险和下一步建议。
 - 不主动访问外部网站；需要网络、安装依赖或推送时按当前运行环境申请授权。
-- 抓取相关实现必须遵守 `docs/crawling-compliance.md`，示例来源默认保持 disabled。
+- 抓取相关实现必须遵守 `docs/crawling-compliance.md`，不得添加演示情报；未经人工确认的来源必须保持 disabled。
 - 发现与计划不一致的需求或未预期改动时先记录并暂停相关文件修改，避免覆盖他人工作。
 
 ## 推荐子代理
@@ -29,7 +29,7 @@
 
 边界：只修改 `backend-api/app`、`backend-api/tests`、后端依赖和相关 API 文档。
 
-交付：接口可被测试客户端调用，除 `/health` 和登录外的业务接口默认需要 Bearer JWT。
+交付：接口可被测试客户端调用；公开内容页对应的只读接口免登录，来源、设置、抓取、状态修改等管理接口必须需要 Bearer JWT。
 
 ### Crawler & AI Agent
 
@@ -45,7 +45,7 @@
 
 边界：只修改 `frontend-app`、前端构建配置和相关前端文档。
 
-交付：未登录自动跳转登录页；登录后可访问仪表盘、情报、每日摘要、来源、日志和设置。
+交付：未登录可访问公开首页、情报列表、情报详情和每日摘要；访问 `/admin/*` 管理页时才跳转登录。
 
 ### Deployment Agent
 

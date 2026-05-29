@@ -20,6 +20,10 @@ def test_beat_schedule_contains_crawl_and_daily_brief_tasks() -> None:
     assert schedule["crawl-enabled-sources-low-frequency"]["task"] == (
         "app.tasks.crawl.crawl_enabled_sources"
     )
+    assert schedule["crawl-enabled-sources-low-frequency"]["schedule"]._orig_hour == 7
+    assert schedule["crawl-enabled-sources-low-frequency"]["schedule"]._orig_minute == 0
     assert schedule["generate-daily-brief-every-evening"]["task"] == (
         "app.tasks.daily_brief.generate_daily_brief"
     )
+    assert schedule["generate-daily-brief-every-evening"]["schedule"]._orig_hour == 7
+    assert schedule["generate-daily-brief-every-evening"]["schedule"]._orig_minute == 30

@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from celery import Celery
 from celery.schedules import crontab
 
@@ -28,11 +26,11 @@ celery_app.conf.update(
     beat_schedule={
         "crawl-enabled-sources-low-frequency": {
             "task": "app.tasks.crawl.crawl_enabled_sources",
-            "schedule": timedelta(hours=6),
+            "schedule": crontab(hour=7, minute=0),
         },
         "generate-daily-brief-every-evening": {
             "task": "app.tasks.daily_brief.generate_daily_brief",
-            "schedule": crontab(hour=18, minute=5),
+            "schedule": crontab(hour=7, minute=30),
         },
     },
 )

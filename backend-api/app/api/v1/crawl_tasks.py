@@ -6,7 +6,7 @@ from app.core.security import require_admin
 from app.db.session import get_db
 from app.models.crawl_task import CrawlTask
 from app.schemas import CrawlTaskRead, Page
-from app.tasks.crawl import crawl_source_task
+from app.tasks.crawl import crawl_enabled_sources_task, crawl_source_task
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
@@ -23,3 +23,9 @@ def list_tasks(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=1
 def trigger_crawl(source_id: int) -> dict[str, object]:
     task = crawl_source_task.delay(source_id)
     return {"task_id": task.id, "source_id": source_id, "message": "crawl_queued"}
+
+
+@router.post("/enabled", response_model=dict)
+def trigger_enabled_sources_crawl() -> dict[str, object]:
+    task = crawl_enabled_sources_task.delay()
+    return {"task_id": task.id, "message": "enabled_sources_crawl_queued"}

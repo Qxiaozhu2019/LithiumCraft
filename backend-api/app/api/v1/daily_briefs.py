@@ -10,7 +10,7 @@ from app.models.daily_brief import DailyBrief
 from app.schemas import DailyBriefRead, Page
 from app.services.daily_brief import generate_daily_brief
 
-router = APIRouter(dependencies=[Depends(require_admin)])
+router = APIRouter()
 
 
 @router.get("", response_model=Page[DailyBriefRead])
@@ -30,5 +30,9 @@ def get_brief(brief_date: date, db: Session = Depends(get_db)) -> DailyBrief:
 
 
 @router.post("/generate", response_model=DailyBriefRead)
-def generate_brief(target_date: date | None = None, db: Session = Depends(get_db)) -> DailyBrief:
+def generate_brief(
+    target_date: date | None = None,
+    _: str = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> DailyBrief:
     return generate_daily_brief(db, target_date)

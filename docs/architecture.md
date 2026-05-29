@@ -2,14 +2,14 @@
 
 ## 总览
 
-LithiumCraft 使用单仓库、前后端分离架构。浏览器访问 Vue 内部工作台，工作台通过 `/api/v1` 调用 FastAPI。FastAPI 负责鉴权、业务 API、数据库读写。Celery Worker 和 Beat 负责抓取、AI 处理和每日摘要。PostgreSQL 保存业务数据，Redis 用作 Celery broker/backend。
+LithiumCraft 使用单仓库、前后端分离架构。浏览器访问 Vue 前台首页与管理工作台，公开内容页通过 `/api/v1` 调用 FastAPI 只读接口，后台管理页登录后携带 Bearer JWT 调用管理接口。FastAPI 负责鉴权、业务 API、数据库读写。Celery Worker 和 Beat 负责抓取、AI 处理和每日摘要。PostgreSQL 保存业务数据，Redis 用作 Celery broker/backend。
 
 ## 服务拓扑
 
 ```text
 Browser
-  -> Vue 工作台
-  -> FastAPI /api/v1
+  -> Vue 前台首页 / 管理工作台
+  -> FastAPI /api/v1 公开只读接口 + 管理接口
   -> PostgreSQL
   -> Redis
   -> Celery Worker / Beat
@@ -28,8 +28,23 @@ Nginx 在 Docker Compose 中作为统一入口，将 `/api/` 转发到 FastAPI�
   -> AI stub 摘要/标签/分类/评分
   -> 风控过滤
   -> 情报库 active 或 blocked
-  -> 工作台检索与每日摘要
+  -> 公开前台展示 active 情报与每日摘要
+  -> 管理工作台查看抓取日志、来源和设置
 ```
+
+## 调度流
+
+```text
+Celery Beat 07:00 Asia/Shanghai
+  -> app.tasks.crawl.crawl_enabled_sources
+  -> 逐个启用来源执行合规抓取
+
+Celery Beat 07:30 Asia/Shanghai
+  -> app.tasks.daily_brief.generate_daily_brief
+  -> 基于当天抓取结果生成每日摘要
+```
+
+管理员也可以在 `/admin/crawl-logs` 手动触发单来源抓取或全部启用来源抓取；API 进程只负责提交 Celery 任务，不同步访问外部站点。
 
 ## 部署策略
 

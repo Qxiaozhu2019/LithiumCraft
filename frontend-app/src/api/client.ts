@@ -165,6 +165,12 @@ export function triggerCrawl(sourceId: number) {
   });
 }
 
+export function triggerEnabledSourcesCrawl() {
+  return apiRequest<{ task_id: string; message: string }>("/crawl-tasks/enabled", {
+    method: "POST"
+  });
+}
+
 export function listCategories() {
   return apiRequest<Category[]>("/categories");
 }

@@ -65,3 +65,11 @@
 - 验证结果：此前已验证 `http://127.0.0.1:8000/health`、`/api/v1/auth/login` 和 `http://127.0.0.1:5173/` 均返回 200。
 - 遗留问题：本地开发数据库 `backend-api/lithiumcraft-dev.db` 仅用于临时联调，不提交；Docker Compose 完整启动仍需有 Docker CLI 的环境验证。
 - 下一步建议：后续本地调试都按 `docs/development.md` 的“推荐：分别启动前后端开发服务”执行。
+
+## 2026-05-29 12:45 - Coordinator Agent
+
+- 领取任务：实现“公开首页 + 每日 7 点抓取 + 手动抓取”规划，并按 subagents 协作方式引入 QA & Docs Agent 做只读复核。
+- 完成内容：后端拆分公开只读 API 与管理员 API；`/api/v1/intelligence`、`/api/v1/daily-briefs`、`/api/v1/categories` 公开访问，情报状态修改、摘要生成、来源、设置、抓取任务仍需管理员 JWT；新增 `POST /api/v1/crawl-tasks/enabled`；Celery Beat 改为 07:00 抓取、07:30 摘要；前端 `/`、`/intelligence`、`/daily-briefs` 公开，`/admin/*` 管理保护；移除启动种子中的示例来源和默认假摘要；补齐 README、API、需求、架构、合规、开发和计划文档。
+- 验证结果：`C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m pytest tests -q -o cache_dir=C:\Users\admin\AppData\Local\Temp\lithiumcraft-pytest-cache` 通过，7 passed；`C:\Users\admin\.conda\envs\lithiumcraft-py312\python.exe -m ruff check app tests --config line-length=100 --no-cache` 通过；`npm run build` 通过，仍有 Rollup pure annotation 和大 chunk 警告。
+- 遗留问题：Docker Compose 真实启动仍受本机 Docker CLI 可用性限制，已拆为 `LC-009`；真实来源仍需人工合规确认后再启用。
+- 下一步建议：在有 Docker CLI 的环境完成 `LC-009` 全栈启动验收；之后通过管理端新增真实中文公开来源，先禁用、手动测试、再启用每日抓取。

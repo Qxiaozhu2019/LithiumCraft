@@ -8,6 +8,10 @@ from app.core.config import settings
 
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PREFIX}/auth/login")
+optional_oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_PREFIX}/auth/login",
+    auto_error=False,
+)
 
 
 def create_access_token(subject: str) -> str:
@@ -16,6 +20,19 @@ def create_access_token(subject: str) -> str:
 
 
 def require_admin(token: str = Depends(oauth2_scheme)) -> str:
+    return _decode_admin_token(token)
+
+
+def optional_admin(token: str | None = Depends(optional_oauth2_scheme)) -> str | None:
+    if not token:
+        return None
+    try:
+        return _decode_admin_token(token)
+    except HTTPException:
+        return None
+
+
+def _decode_admin_token(token: str) -> str:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[ALGORITHM])
         subject = payload.get("sub")

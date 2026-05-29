@@ -1,14 +1,28 @@
 # LithiumCraft
 
-LithiumCraft 是一个面向内部投研场景的锂电池工艺情报工作台。第一版聚焦少量精选公开合规来源，自动抓取、清洗、摘要、分类、入库，并提供内部检索和每日摘要。
+LithiumCraft 是一个面向内部投研场景的锂电池工艺情报工作台。第一版聚焦少量精选公开合规来源，自动抓取、清洗、摘要、分类、入库，并提供公开只读首页、情报检索和每日摘要；来源管理、抓取日志、系统设置等管理能力仍由单管理员登录后使用。
 
 ## 服务组成
 
-- `frontend-app`：Vue 3 + Vite + Element Plus 内部工作台。
+- `frontend-app`：Vue 3 + Vite + Element Plus 前台首页与管理工作台。
 - `backend-api`：FastAPI REST API、领域模型和业务服务。
 - `worker`：Celery worker/beat，执行抓取和每日摘要任务。
 - `deploy`：Docker Compose、Nginx、备份脚本。
 - `docs`：需求、架构、API、数据模型、合规、开发和部署文档。
+
+## 默认访问
+
+- `/`：公开首页，展示最新情报、每日摘要和空状态提示，不需要登录。
+- `/intelligence`、`/intelligence/:id`、`/daily-briefs`：公开只读内容页。
+- `/login`：管理员登录入口。
+- `/admin/sources`、`/admin/crawl-logs`、`/admin/settings`：管理员入口，需要 Bearer JWT。
+
+## 抓取策略
+
+- Celery Beat 每天 `Asia/Shanghai 07:00` 自动抓取全部启用来源。
+- 每日摘要在 `07:30` 生成，避免早于当天抓取结果。
+- 管理员可在抓取日志页手动触发单来源抓取或“抓取全部启用来源”。
+- 首批来源默认禁用或人工确认后再启用；系统不放置演示情报。
 
 ## 快速启动
 
@@ -19,7 +33,7 @@ docker compose -f deploy/docker-compose.yml --env-file .env up --build
 
 默认地址：
 
-- 工作台：http://localhost:3000
+- 前台/工作台：http://localhost:3000
 - API 文档：http://localhost:8000/docs
 - Nginx 入口：http://localhost:8080
 
