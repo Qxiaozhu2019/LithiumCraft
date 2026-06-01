@@ -719,6 +719,16 @@ button {
   gap: 12px;
 }
 
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.topic-grid-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .process-stage-card {
   display: block;
   min-height: 150px;
@@ -727,7 +737,29 @@ button {
   background: rgba(255, 252, 242, 0.72);
 }
 
+.topic-card {
+  display: block;
+  min-height: 158px;
+  padding: 18px;
+  border: 1px solid rgba(20, 33, 29, 0.14);
+  background: rgba(255, 252, 242, 0.72);
+}
+
+.topic-card-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--lc-green);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
 .process-stage-card strong {
+  display: block;
+  font-size: 1.12rem;
+}
+
+.topic-card strong {
   display: block;
   font-size: 1.12rem;
 }
@@ -738,7 +770,14 @@ button {
   line-height: 1.7;
 }
 
+.topic-card p {
+  margin: 10px 0;
+  color: #59675f;
+  line-height: 1.7;
+}
+
 .process-stage-card span,
+.topic-card .process-meta,
 .process-meta,
 .process-brief-item span,
 .process-detail-meta {
@@ -822,6 +861,46 @@ button {
   align-items: stretch;
 }
 
+.topic-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.topic-detail-grid h3,
+.topic-impact-list p {
+  margin-top: 0;
+}
+
+.topic-process-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topic-process-links a {
+  padding: 7px 11px;
+  border: 1px solid rgba(20, 33, 29, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.48);
+  color: #385146;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.topic-impact-list {
+  display: grid;
+  gap: 10px;
+}
+
+.topic-impact-list p {
+  padding: 14px 16px;
+  border-left: 3px solid rgba(31, 111, 74, 0.42);
+  background: rgba(255, 255, 255, 0.42);
+  color: #4f5f57;
+  line-height: 1.75;
+}
+
 .process-diagram {
   padding: 22px;
   border: 1px solid rgba(31, 111, 74, 0.16);
@@ -874,6 +953,8 @@ button {
 }
 
 .process-stage-card:hover,
+.topic-card:hover,
+.topic-process-links a:hover,
 .process-update-item:hover h3,
 .process-brief-item:hover strong,
 .process-login-link:hover,
@@ -1247,6 +1328,12 @@ button {
   }
 
   .process-stage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-grid,
+  .topic-grid-compact,
+  .topic-detail-grid {
     grid-template-columns: 1fr;
   }
 

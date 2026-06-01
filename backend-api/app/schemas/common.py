@@ -111,9 +111,28 @@ class ProcessImageRead(BaseModel):
     is_local: bool = True
 
 
+class TopicRead(BaseModel):
+    slug: str
+    name: str
+    summary: str
+    description: str
+    keywords: list[str]
+    related_process_slugs: list[str]
+    key_properties: list[str]
+    process_impacts: list[str]
+    item_count: int
+    latest_crawled_at: datetime | None
+
+
+class TopicDetail(TopicRead):
+    items: list[IntelligenceRead]
+    source_count: int
+
+
 class ProcessStageDetail(ProcessStageRead):
     items: list[IntelligenceRead]
     images: list[ProcessImageRead]
+    related_topics: list[TopicRead] = []
     source_count: int
 
 

@@ -12,6 +12,8 @@ import type {
   Setting,
   Source,
   SourcePayload,
+  Topic,
+  TopicDetail,
   TokenResponse
 } from "./types";
 
@@ -122,6 +124,16 @@ export function listProcessStages() {
 
 export function getProcessStage(slug: string, pageSize = 20) {
   return apiRequest<ProcessStageDetail>(`/processes/${encodeURIComponent(slug)}`, {
+    params: { page_size: pageSize }
+  });
+}
+
+export function listTopics() {
+  return apiRequest<Topic[]>("/topics");
+}
+
+export function getTopic(slug: string, pageSize = 20) {
+  return apiRequest<TopicDetail>(`/topics/${encodeURIComponent(slug)}`, {
     params: { page_size: pageSize }
   });
 }

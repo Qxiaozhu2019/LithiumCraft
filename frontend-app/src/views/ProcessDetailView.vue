@@ -31,6 +31,21 @@
       </div>
     </el-card>
 
+    <el-card v-if="stage?.related_topics?.length" class="panel-card" shadow="never">
+      <template #header>关联材料与特性专题</template>
+      <div class="topic-grid topic-grid-compact">
+        <RouterLink v-for="topic in stage.related_topics" :key="topic.slug" class="topic-card" :to="`/topics/${topic.slug}`">
+          <span class="topic-card-label">{{ topic.key_properties.slice(0, 2).join(" / ") }}</span>
+          <strong>{{ topic.name }}</strong>
+          <p>{{ topic.summary }}</p>
+          <div class="process-meta">
+            <span>{{ topic.item_count }} 条资料</span>
+            <span>{{ topic.related_process_slugs.length }} 个关联工序</span>
+          </div>
+        </RouterLink>
+      </div>
+    </el-card>
+
     <el-card class="panel-card" shadow="never">
       <template #header>相关工艺资料</template>
       <div v-if="loading" class="process-empty">正在加载相关资料...</div>

@@ -13,6 +13,7 @@
       <el-menu :default-active="route.path" router class="workspace-menu">
         <el-menu-item index="/">首页</el-menu-item>
         <el-menu-item index="/processes">制造工艺</el-menu-item>
+        <el-menu-item index="/topics">材料与特性</el-menu-item>
         <el-menu-item index="/intelligence">资料检索</el-menu-item>
         <el-menu-item index="/daily-briefs">资料摘要</el-menu-item>
       </el-menu>
@@ -66,6 +67,7 @@
       <nav class="portal-nav">
         <RouterLink to="/">首页</RouterLink>
         <RouterLink to="/processes">制造工艺</RouterLink>
+        <RouterLink to="/topics">材料与特性</RouterLink>
       </nav>
       <RouterLink class="portal-login" to="/login">管理登录</RouterLink>
     </header>

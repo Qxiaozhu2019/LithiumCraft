@@ -5,6 +5,8 @@ from app.db.session import get_db
 from app.models.intelligence import IntelligenceItem
 from app.schemas import ProcessImageRead, ProcessStageDetail, ProcessStageRead
 from app.services.process_stages import PROCESS_STAGES, get_process_stage, latest_crawled_at, process_stage_query
+from app.services.topics import topics_for_process
+from app.api.v1.topics import build_topic_read
 
 router = APIRouter()
 
@@ -58,5 +60,6 @@ def get_process(
                 is_local=True,
             )
         ],
+        related_topics=[build_topic_read(db, topic) for topic in topics_for_process(stage.slug)],
         source_count=len({item.source_id for item in items if item.source_id is not None}),
     )

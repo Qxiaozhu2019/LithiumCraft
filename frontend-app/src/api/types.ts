@@ -151,5 +151,24 @@ export interface ProcessImage {
 export interface ProcessStageDetail extends ProcessStage {
   items: IntelligenceItem[];
   images: ProcessImage[];
+  related_topics: Topic[];
+  source_count: number;
+}
+
+export interface Topic {
+  slug: string;
+  name: string;
+  summary: string;
+  description: string;
+  keywords: string[];
+  related_process_slugs: string[];
+  key_properties: string[];
+  process_impacts: string[];
+  item_count: number;
+  latest_crawled_at: string | null;
+}
+
+export interface TopicDetail extends Topic {
+  items: IntelligenceItem[];
   source_count: number;
 }

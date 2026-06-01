@@ -91,6 +91,34 @@ PROCESS_TRANSLATIONS: dict[str, TranslatedMaterial] = {
             "\u8be5\u5de5\u5e8f\u5e38\u7528\u4e8e\u8bc6\u522b\u6781\u7247\u9519\u4f4d\u3001\u5377\u7ed5/\u53e0\u7247\u5bf9\u9f50\u5f02\u5e38\u548c\u5185\u90e8\u7ed3\u6784\u7f3a\u9677\u3002"
         ),
     ),
+    "lithium iron phosphate": TranslatedMaterial(
+        title="磷酸铁锂正极材料",
+        content="磷酸铁锂正极材料热稳定性和安全性较好，成本相对可控；制造中需要关注颗粒分散、涂布面密度、辊压压实和低温倍率表现。",
+    ),
+    "ncm cathode material": TranslatedMaterial(
+        title="三元正极材料",
+        content="三元正极材料通常提供较高能量密度，但对水分、表面副反应、热稳定性和化成窗口更敏感，需要配合严格的制浆、涂布和环境控制。",
+    ),
+    "graphite anode": TranslatedMaterial(
+        title="石墨负极材料",
+        content="石墨负极材料工艺成熟、循环稳定性较好；制造中需关注浆料分散、极片孔隙率、注液浸润和首次化成形成稳定 SEI。",
+    ),
+    "silicon carbon anode": TranslatedMaterial(
+        title="硅碳负极材料",
+        content="硅碳负极可提升比容量，但体积膨胀和首效问题更突出；工艺上需关注粘结体系、极片反弹、孔结构和化成策略。",
+    ),
+    "electrolyte": TranslatedMaterial(
+        title="电解液",
+        content="电解液由溶剂、锂盐和添加剂组成，影响注液浸润、SEI/CEI 成膜、温度窗口和安全表现，是注液、静置与化成工艺的重要变量。",
+    ),
+    "separator": TranslatedMaterial(
+        title="隔膜",
+        content="隔膜提供离子通道并隔离正负极，关键特性包括孔隙率、闭孔温度、热收缩和机械强度，会影响卷绕/叠片、注液浸润和安全测试。",
+    ),
+    "dry electrode": TranslatedMaterial(
+        title="干法电极",
+        content="干法电极通过干混、粘结剂纤维化、干法成膜、集流体复合和辊压，减少溶剂和烘干能耗；难点在分散、膜强度、附着力和厚电极传输。",
+    ),
 }
 
 

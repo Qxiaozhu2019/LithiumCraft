@@ -14,6 +14,8 @@ from app.schemas.common import (
     SourceCreate,
     SourceRead,
     SourceUpdate,
+    TopicDetail,
+    TopicRead,
     TokenResponse,
 )
 
@@ -33,5 +35,7 @@ __all__ = [
     "SourceCreate",
     "SourceRead",
     "SourceUpdate",
+    "TopicDetail",
+    "TopicRead",
     "TokenResponse",
 ]

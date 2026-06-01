@@ -12,6 +12,7 @@ def test_public_readonly_endpoints_do_not_require_login() -> None:
     with TestClient(app) as client:
         assert client.get("/api/v1/intelligence").status_code == 200
         assert client.get("/api/v1/processes").status_code == 200
+        assert client.get("/api/v1/topics").status_code == 200
         assert client.get("/api/v1/daily-briefs").status_code == 200
         assert client.get("/api/v1/categories").status_code == 200
 
@@ -142,6 +143,57 @@ def test_process_stage_api_matches_crawled_content() -> None:
     assert detail["images"][0]["is_local"] is True
     assert detail["source_count"] >= 1
     assert any("涂布厚度" in item["title"] for item in detail["items"])
+
+
+def test_topic_api_matches_material_content() -> None:
+    with TestClient(app) as client:
+        with SessionLocal() as db:
+            source = Source(
+                name="material public source",
+                type=SourceType.webpage,
+                entry_url="https://example.com/material-source",
+                domain="example.com",
+                status=SourceStatus.manual_only,
+            )
+            db.add(source)
+            db.commit()
+            db.refresh(source)
+            item = IntelligenceItem(
+                title="LFP cathode material calendering reference",
+                normalized_title="LFP cathode material calendering reference",
+                summary="LFP cathode material affects slurry dispersion, coating loading, and calendering window.",
+                content_excerpt="Cathode material particle morphology, capacity, and thermal stability affect cell manufacturing.",
+                source_url="https://example.com/material-cathode",
+                source_name="material public source",
+                source_id=source.id,
+                source_published_at=datetime.now(timezone.utc),
+                category="manufacturing process",
+                tags="cathode,LFP,calendering",
+                status=IntelligenceStatus.active,
+            )
+            db.add(item)
+            db.commit()
+
+        list_response = client.get("/api/v1/topics")
+        detail_response = client.get("/api/v1/topics/cathode-materials")
+
+    assert list_response.status_code == 200
+    cathode = next(topic for topic in list_response.json() if topic["slug"] == "cathode-materials")
+    assert cathode["item_count"] >= 1
+    assert "calendering" in cathode["related_process_slugs"]
+    assert detail_response.status_code == 200
+    detail = detail_response.json()
+    assert detail["slug"] == "cathode-materials"
+    assert detail["source_count"] >= 1
+    assert any(item["source_url"] == "https://example.com/material-cathode" for item in detail["items"])
+
+
+def test_topic_detail_returns_404_for_unknown_slug() -> None:
+    with TestClient(app) as client:
+        response = client.get("/api/v1/topics/not-found")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "topic_not_found"
 
 
 def test_public_search_includes_excerpt_and_tags() -> None:

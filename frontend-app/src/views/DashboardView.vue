@@ -46,6 +46,29 @@
     <section class="process-section">
       <div class="process-section-title with-action">
         <div>
+          <span>Materials</span>
+          <h2>材料与特性</h2>
+        </div>
+        <RouterLink class="process-more" to="/topics">查看全部专题</RouterLink>
+      </div>
+
+      <div v-if="topicLoading" class="process-empty">正在加载材料专题...</div>
+      <div v-else class="topic-grid topic-grid-compact">
+        <RouterLink v-for="topic in topics" :key="topic.slug" class="topic-card" :to="`/topics/${topic.slug}`">
+          <span class="topic-card-label">{{ topic.key_properties.slice(0, 2).join(" / ") }}</span>
+          <strong>{{ topic.name }}</strong>
+          <p>{{ topic.summary }}</p>
+          <div class="process-meta">
+            <span>{{ topic.item_count }} 条资料</span>
+            <span>{{ topic.related_process_slugs.length }} 个关联工序</span>
+          </div>
+        </RouterLink>
+      </div>
+    </section>
+
+    <section class="process-section">
+      <div class="process-section-title with-action">
+        <div>
           <span>Updated Stages</span>
           <h2>最近更新的工序资料</h2>
         </div>
@@ -77,15 +100,17 @@ import { ElMessage } from "element-plus";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
-import { listProcessStages } from "@/api/client";
-import type { ProcessStage } from "@/api/types";
+import { listProcessStages, listTopics } from "@/api/client";
+import type { ProcessStage, Topic } from "@/api/types";
 import { authStore } from "@/stores/auth";
 
 const router = useRouter();
 const stageLoading = ref(false);
+const topicLoading = ref(false);
 const searchTerm = ref("");
 const stages = ref<ProcessStage[]>([]);
-const examples = ["涂布厚度", "辊压压实密度", "化成分容", "极片缺陷"];
+const topics = ref<Topic[]>([]);
+const examples = ["涂布厚度", "辊压压实密度", "化成分容", "干法电极", "电解液浸润"];
 
 const updatedStages = computed(() =>
   stages.value
@@ -102,6 +127,17 @@ async function loadStages() {
     ElMessage.error(err instanceof Error ? err.message : "工序目录加载失败");
   } finally {
     stageLoading.value = false;
+  }
+}
+
+async function loadTopics() {
+  topicLoading.value = true;
+  try {
+    topics.value = await listTopics();
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "材料专题加载失败");
+  } finally {
+    topicLoading.value = false;
   }
 }
 
@@ -132,5 +168,8 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
-onMounted(loadStages);
+onMounted(() => {
+  loadStages();
+  loadTopics();
+});
 </script>
