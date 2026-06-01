@@ -11,6 +11,7 @@ from app.models.source import Source, SourceStatus, SourceType
 def test_public_readonly_endpoints_do_not_require_login() -> None:
     with TestClient(app) as client:
         assert client.get("/api/v1/intelligence").status_code == 200
+        assert client.get("/api/v1/processes").status_code == 200
         assert client.get("/api/v1/daily-briefs").status_code == 200
         assert client.get("/api/v1/categories").status_code == 200
 
@@ -97,6 +98,59 @@ def test_public_intelligence_only_exposes_active_items() -> None:
     assert "公开隐藏情报" not in titles
     assert blocked_detail_response.status_code == 404
     assert active_detail_response.status_code == 200
+
+
+def test_process_stage_api_matches_crawled_content() -> None:
+    with TestClient(app) as client:
+        with SessionLocal() as db:
+            item = IntelligenceItem(
+                title="涂布厚度一致性控制公开资料",
+                normalized_title="涂布厚度一致性控制公开资料",
+                summary="极片涂布面密度与干燥窗口说明",
+                content_excerpt="涂布工艺关注浆料流变、干燥温度和极片厚度。",
+                source_url="https://example.com/process-coating",
+                source_name="公开工艺来源",
+                source_published_at=datetime.now(timezone.utc),
+                category="制造工艺",
+                tags="涂布,极片,干燥",
+                status=IntelligenceStatus.active,
+            )
+            db.add(item)
+            db.commit()
+
+        list_response = client.get("/api/v1/processes")
+        detail_response = client.get("/api/v1/processes/coating")
+
+    assert list_response.status_code == 200
+    coating = next(stage for stage in list_response.json() if stage["slug"] == "coating")
+    assert coating["item_count"] >= 1
+    assert detail_response.status_code == 200
+    assert detail_response.json()["name"] == "涂布"
+    assert any("涂布厚度" in item["title"] for item in detail_response.json()["items"])
+
+
+def test_public_search_includes_excerpt_and_tags() -> None:
+    with TestClient(app) as client:
+        with SessionLocal() as db:
+            item = IntelligenceItem(
+                title="公开制造资料",
+                normalized_title="公开制造资料",
+                summary="常规公开摘要",
+                content_excerpt="化成分容阶段需要关注容量分档和内阻一致性。",
+                source_url="https://example.com/search-process-excerpt",
+                source_name="公开工艺来源",
+                source_published_at=datetime.now(timezone.utc),
+                category="制造工艺",
+                tags="化成,分容",
+                status=IntelligenceStatus.active,
+            )
+            db.add(item)
+            db.commit()
+
+        response = client.get("/api/v1/intelligence", params={"q": "化成分容"})
+
+    assert response.status_code == 200
+    assert any(item["source_url"] == "https://example.com/search-process-excerpt" for item in response.json()["items"])
 
 
 def test_manual_crawl_endpoint_runs_without_redis(monkeypatch) -> None:

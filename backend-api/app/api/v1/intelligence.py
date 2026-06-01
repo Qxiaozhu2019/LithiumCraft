@@ -1,13 +1,14 @@
 from datetime import date, datetime, time
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.core.security import optional_admin, require_admin
 from app.db.session import get_db
 from app.models.intelligence import IntelligenceItem, IntelligenceStatus
 from app.schemas import IntelligenceRead, IntelligenceUpdate, Page
+from app.services.process_stages import get_process_stage, process_stage_query
 
 router = APIRouter()
 
@@ -17,6 +18,7 @@ def list_intelligence(
     q: str | None = None,
     category: str | None = None,
     status: IntelligenceStatus | None = None,
+    process_stage: str | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
     page: int = Query(1, ge=1),
@@ -25,9 +27,21 @@ def list_intelligence(
     db: Session = Depends(get_db),
 ) -> Page[IntelligenceRead]:
     query = db.query(IntelligenceItem)
+    if process_stage:
+        stage = get_process_stage(process_stage)
+        if stage is None:
+            raise HTTPException(status_code=404, detail="process_stage_not_found")
+        query = process_stage_query(db, stage)
     if q:
         keyword = f"%{q}%"
-        query = query.filter(IntelligenceItem.title.ilike(keyword) | IntelligenceItem.summary.ilike(keyword))
+        query = query.filter(
+            or_(
+                IntelligenceItem.title.ilike(keyword),
+                IntelligenceItem.summary.ilike(keyword),
+                IntelligenceItem.content_excerpt.ilike(keyword),
+                IntelligenceItem.tags.ilike(keyword),
+            )
+        )
     if category:
         query = query.filter(IntelligenceItem.category == category)
     if date_from:

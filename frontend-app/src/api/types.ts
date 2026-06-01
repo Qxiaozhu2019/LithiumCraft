@@ -40,6 +40,7 @@ export interface IntelligenceItem {
 export interface IntelligenceQuery {
   q?: string;
   category?: string;
+  process_stage?: string;
   status?: IntelligenceStatus | "";
   date_from?: string;
   date_to?: string;
@@ -126,4 +127,17 @@ export interface Setting {
   key: string;
   value: string;
   description: string;
+}
+
+export interface ProcessStage {
+  slug: string;
+  name: string;
+  description: string;
+  keywords: string[];
+  item_count: number;
+  latest_crawled_at: string | null;
+}
+
+export interface ProcessStageDetail extends ProcessStage {
+  items: IntelligenceItem[];
 }

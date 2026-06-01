@@ -17,6 +17,8 @@ const router = createRouter({
       children: [
         { path: "", name: "home", component: () => import("@/views/DashboardView.vue") },
         { path: "dashboard", redirect: "/" },
+        { path: "processes", name: "processes", component: () => import("@/views/ProcessListView.vue") },
+        { path: "processes/:slug", name: "process-detail", component: () => import("@/views/ProcessDetailView.vue"), props: true },
         { path: "intelligence", name: "intelligence", component: () => import("@/views/IntelligenceListView.vue") },
         { path: "intelligence/:id", name: "intelligence-detail", component: () => import("@/views/IntelligenceDetailView.vue"), props: true },
         { path: "daily-briefs", name: "daily-briefs", component: () => import("@/views/DailyBriefsView.vue") },

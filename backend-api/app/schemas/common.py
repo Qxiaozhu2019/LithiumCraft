@@ -92,6 +92,19 @@ class IntelligenceUpdate(BaseModel):
     block_reason: str | None = None
 
 
+class ProcessStageRead(BaseModel):
+    slug: str
+    name: str
+    description: str
+    keywords: list[str]
+    item_count: int
+    latest_crawled_at: datetime | None
+
+
+class ProcessStageDetail(ProcessStageRead):
+    items: list[IntelligenceRead]
+
+
 class DailyBriefRead(BaseModel):
     id: int
     brief_date: date

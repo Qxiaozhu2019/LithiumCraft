@@ -63,8 +63,8 @@
 
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import { onMounted, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { listCategories, listIntelligence } from "@/api/client";
 import type { Category, IntelligenceItem, IntelligenceStatus } from "@/api/types";
@@ -74,6 +74,7 @@ import { authStore } from "@/stores/auth";
 import { formatDate, splitTags } from "@/utils/format";
 
 const router = useRouter();
+const route = useRoute();
 const loading = ref(false);
 const items = ref<IntelligenceItem[]>([]);
 const categories = ref<Category[]>([]);
@@ -115,10 +116,20 @@ function openDetail(row: IntelligenceItem) {
   router.push(`/intelligence/${row.id}`);
 }
 
+function applyRouteQuery() {
+  filters.q = typeof route.query.q === "string" ? route.query.q : "";
+}
+
 onMounted(async () => {
+  applyRouteQuery();
   await Promise.all([
     load(1),
     listCategories().then((result) => { categories.value = result; }).catch(() => { categories.value = []; })
   ]);
+});
+
+watch(() => route.query.q, () => {
+  applyRouteQuery();
+  load(1);
 });
 </script>

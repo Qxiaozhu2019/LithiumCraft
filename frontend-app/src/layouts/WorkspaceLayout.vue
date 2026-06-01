@@ -12,6 +12,7 @@
       <p class="menu-section">公开内容</p>
       <el-menu :default-active="route.path" router class="workspace-menu">
         <el-menu-item index="/">首页</el-menu-item>
+        <el-menu-item index="/processes">制造工艺</el-menu-item>
         <el-menu-item index="/intelligence">资讯列表</el-menu-item>
         <el-menu-item index="/daily-briefs">每日简报</el-menu-item>
       </el-menu>
@@ -64,6 +65,7 @@
       </RouterLink>
       <nav class="portal-nav">
         <RouterLink to="/">首页</RouterLink>
+        <RouterLink to="/processes">制造工艺</RouterLink>
       </nav>
       <RouterLink class="portal-login" to="/login">管理登录</RouterLink>
     </header>

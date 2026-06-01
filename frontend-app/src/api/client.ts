@@ -7,6 +7,8 @@ import type {
   IntelligenceUpdate,
   LoginRequest,
   Page,
+  ProcessStage,
+  ProcessStageDetail,
   Setting,
   Source,
   SourcePayload,
@@ -112,6 +114,16 @@ export function listIntelligence(query: IntelligenceQuery = {}) {
 
 export function getIntelligence(id: number) {
   return apiRequest<IntelligenceItem>(`/intelligence/${id}`);
+}
+
+export function listProcessStages() {
+  return apiRequest<ProcessStage[]>("/processes");
+}
+
+export function getProcessStage(slug: string, pageSize = 20) {
+  return apiRequest<ProcessStageDetail>(`/processes/${encodeURIComponent(slug)}`, {
+    params: { page_size: pageSize }
+  });
 }
 
 export function updateIntelligence(id: number, payload: IntelligenceUpdate) {

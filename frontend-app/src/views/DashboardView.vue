@@ -1,119 +1,147 @@
 <template>
-  <article class="news-home">
-    <header class="news-masthead">
+  <article class="process-home">
+    <header class="process-masthead">
       <div>
-        <p class="news-brand">LithiumCraft</p>
-        <h1>锂电资讯</h1>
-        <p>追踪公开来源中的产业政策、材料工艺、储能应用与企业动态，只展示经过合规检查的信息。</p>
+        <p class="process-brand">LithiumCraft</p>
+        <h1>锂电池制造工艺知识库</h1>
+        <p>围绕电芯制造全流程聚合公开资料，优先检索制浆、涂布、辊压、化成、分容等工艺内容。</p>
       </div>
-      <RouterLink v-if="!authStore.isAuthenticated.value" class="news-login-link" to="/login">管理登录</RouterLink>
+      <RouterLink v-if="!authStore.isAuthenticated.value" class="process-login-link" to="/login">管理登录</RouterLink>
     </header>
 
-    <section class="news-section">
-      <div class="news-section-title">
+    <section class="process-search-panel">
+      <label for="process-search">检索制造工艺</label>
+      <div class="process-search-row">
+        <el-input
+          id="process-search"
+          v-model="searchTerm"
+          size="large"
+          clearable
+          placeholder="试试：涂布厚度、辊压压实密度、化成分容、极片缺陷"
+          @keyup.enter="submitSearch"
+        />
+        <el-button type="primary" size="large" @click="submitSearch">搜索</el-button>
+      </div>
+      <div class="process-search-examples">
+        <button v-for="example in examples" :key="example" type="button" @click="searchExample(example)">{{ example }}</button>
+      </div>
+    </section>
+
+    <section class="process-section">
+      <div class="process-section-title">
+        <span>Manufacturing Flow</span>
+        <h2>电芯制造全流程</h2>
+      </div>
+
+      <div v-if="stageLoading" class="process-empty">正在加载工序目录...</div>
+      <div v-else class="process-stage-grid">
+        <RouterLink v-for="stage in stages" :key="stage.slug" class="process-stage-card" :to="`/processes/${stage.slug}`">
+          <strong>{{ stage.name }}</strong>
+          <p>{{ stage.description }}</p>
+          <span>{{ stage.item_count }} 条相关公开资料</span>
+        </RouterLink>
+      </div>
+    </section>
+
+    <section class="process-section">
+      <div class="process-section-title with-action">
         <div>
-          <span>Latest Updates</span>
-          <h2>最新资讯</h2>
+          <span>Process Updates</span>
+          <h2>工艺相关最新资料</h2>
         </div>
         <el-button size="small" text @click="refresh" :loading="loading">刷新</el-button>
       </div>
 
-      <div v-if="loading && !latest.length" class="news-empty">正在加载公开信息...</div>
-
-      <template v-else-if="headline">
-        <RouterLink class="news-lead" :to="`/intelligence/${headline.id}`">
-          <span class="news-kicker">头条</span>
-          <h3>{{ displayText(headline.title) }}</h3>
-          <p>{{ previewText(headline) }}</p>
-          <div class="news-meta">
-            <span>{{ displayText(headline.source_name) }}</span>
-            <span>{{ displayText(headline.category || "综合") }}</span>
-            <span>{{ formatDateTime(headline.source_published_at || headline.crawled_at) }}</span>
+      <div v-if="loading && !latest.length" class="process-empty">正在加载公开资料...</div>
+      <div v-else-if="latest.length" class="process-update-list">
+        <RouterLink v-for="item in latest" :key="item.id" class="process-update-item" :to="`/intelligence/${item.id}`">
+          <h3>{{ displayText(item.title) }}</h3>
+          <p>{{ previewText(item) }}</p>
+          <div class="process-meta">
+            <span>{{ displayText(item.source_name) }}</span>
+            <span>{{ displayText(item.category || "综合") }}</span>
+            <span>{{ formatDateTime(item.source_published_at || item.crawled_at) }}</span>
           </div>
         </RouterLink>
-
-        <div class="news-list">
-          <RouterLink v-for="item in secondaryItems" :key="item.id" class="news-list-item" :to="`/intelligence/${item.id}`">
-            <div>
-              <h3>{{ displayText(item.title) }}</h3>
-              <p>{{ previewText(item) }}</p>
-              <div class="news-meta">
-                <span>{{ displayText(item.source_name) }}</span>
-                <span>{{ displayText(item.category || "综合") }}</span>
-                <span>{{ formatDateTime(item.source_published_at || item.crawled_at) }}</span>
-              </div>
-            </div>
-          </RouterLink>
-        </div>
-
-        <RouterLink class="news-more" to="/intelligence">查看全部资讯</RouterLink>
-      </template>
-
-      <div v-else class="news-empty">
-        <strong>暂无资讯</strong>
-        <p>等待每日 07:00 自动更新，或管理员登录后手动更新。</p>
       </div>
+      <div v-else class="process-empty align-left">
+        <strong>暂无工艺相关资料</strong>
+        <p>等待抓取更新或管理员添加更聚焦制造工艺的公开来源。</p>
+      </div>
+
+      <RouterLink class="process-more" to="/intelligence">查看全部公开资料</RouterLink>
     </section>
 
-    <section class="news-section">
-      <div class="news-section-title">
-        <div>
-          <span>Daily Brief</span>
-          <h2>每日简报</h2>
-        </div>
+    <section class="process-section process-brief-section">
+      <div class="process-section-title">
+        <span>Brief</span>
+        <h2>每日简报</h2>
       </div>
-
-      <div v-if="briefs.length" class="brief-paper-list">
-        <RouterLink v-for="brief in briefs" :key="brief.id" to="/daily-briefs" class="brief-paper-item">
-          <span>{{ brief.brief_date }} · {{ brief.status }}</span>
+      <div v-if="briefs.length" class="process-brief-list">
+        <RouterLink v-for="brief in briefs" :key="brief.id" to="/daily-briefs" class="process-brief-item">
           <strong>{{ displayText(brief.title) }}</strong>
-          <p>{{ displayText(brief.overview || "暂无总览") }}</p>
+          <span>{{ brief.brief_date }} · {{ brief.status }}</span>
         </RouterLink>
       </div>
-      <div v-else class="news-empty align-left">
-        <strong>暂无简报</strong>
-        <p>更新完成后将生成每日简报。</p>
-      </div>
-
-      <RouterLink class="news-more" to="/daily-briefs">更多简报</RouterLink>
+      <RouterLink class="process-more" to="/daily-briefs">查看简报</RouterLink>
     </section>
-
-    <footer class="news-footnote">
-      <strong>内容边界</strong>
-      <span>仅展示公开来源中的摘要、链接和必要说明，不绕过登录、付费墙、验证码或 robots 限制。</span>
-    </footer>
   </article>
 </template>
 
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-import { listDailyBriefs, listIntelligence } from "@/api/client";
-import type { DailyBrief, IntelligenceItem } from "@/api/types";
+import { listDailyBriefs, listIntelligence, listProcessStages } from "@/api/client";
+import type { DailyBrief, IntelligenceItem, ProcessStage } from "@/api/types";
 import { authStore } from "@/stores/auth";
 
+const router = useRouter();
 const loading = ref(false);
+const stageLoading = ref(false);
+const searchTerm = ref("");
+const stages = ref<ProcessStage[]>([]);
 const latest = ref<IntelligenceItem[]>([]);
 const briefs = ref<DailyBrief[]>([]);
-
-const headline = computed(() => latest.value[0] ?? null);
-const secondaryItems = computed(() => latest.value.slice(1, 10));
+const examples = ["涂布厚度", "辊压压实密度", "化成分容", "极片缺陷"];
 
 async function refresh() {
   loading.value = true;
   try {
-    const [allLatest, briefPage] = await Promise.all([
-      listIntelligence({ page_size: 10 }),
-      listDailyBriefs(1, 5)
+    const [processItems, briefPage] = await Promise.all([
+      listIntelligence({ category: "制造工艺", page_size: 6 }),
+      listDailyBriefs(1, 3)
     ]);
-    latest.value = allLatest.items;
+    latest.value = processItems.items;
     briefs.value = briefPage.items;
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "信息加载失败");
+    ElMessage.error(err instanceof Error ? err.message : "工艺资料加载失败");
   } finally {
     loading.value = false;
   }
+}
+
+async function loadStages() {
+  stageLoading.value = true;
+  try {
+    stages.value = await listProcessStages();
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "工序目录加载失败");
+  } finally {
+    stageLoading.value = false;
+  }
+}
+
+function submitSearch() {
+  const q = searchTerm.value.trim();
+  if (!q) return;
+  router.push({ path: "/intelligence", query: { q } });
+}
+
+function searchExample(example: string) {
+  searchTerm.value = example;
+  submitSearch();
 }
 
 function displayText(value: string) {
@@ -143,5 +171,8 @@ function formatDateTime(value: string | null) {
   }).format(date);
 }
 
-onMounted(refresh);
+onMounted(() => {
+  loadStages();
+  refresh();
+});
 </script>
