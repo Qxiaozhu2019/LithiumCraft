@@ -55,8 +55,7 @@ class GenericWebCrawler:
         summary = description.get("content", "").strip() if description else ""
         root = self._content_root(soup, page_title)
         root_text = root.get_text(" ", strip=True) if root else ""
-        paragraphs = [p.get_text(" ", strip=True) for p in soup.select("p") if len(p.get_text(strip=True)) >= 20]
-        content = self._clean_text(" ".join([summary, root_text, *paragraphs]))[:2000].strip() or title
+        content = self._clean_text(" ".join([summary, root_text]))[:2000].strip() or title
 
         for image in soup.select("img[src]")[:5]:
             image_url = urljoin(str(response.url), image.get("src", ""))
@@ -85,6 +84,8 @@ class GenericWebCrawler:
             "Previous Next",
         )
         cleaned = text
+        if "Helpful? Yes No" in cleaned:
+            cleaned = cleaned.split("Helpful? Yes No", 1)[0]
         for phrase in stop_phrases:
             cleaned = cleaned.replace(phrase, " ")
         return " ".join(cleaned.split())

@@ -267,6 +267,49 @@ def test_crawl_runner_only_publishes_process_related_items(monkeypatch) -> None:
 
 
 
+
+def test_known_process_materials_are_translated_before_insert(monkeypatch) -> None:
+    from app.services import crawl_runner
+    from app.services.crawlers.base import CrawledItem
+
+    monkeypatch.setattr(
+        crawl_runner,
+        "crawl_source",
+        lambda source: [
+            CrawledItem(
+                title="Coating",
+                url="https://example.com/translated-coating",
+                content="The process of uniformly applying slurry onto the current collector for lithium-ion battery electrodes.",
+            )
+        ],
+    )
+
+    with TestClient(app):
+        with SessionLocal() as db:
+            source = Source(
+                name="translation test source",
+                type=SourceType.webpage,
+                entry_url="https://example.com/translated-coating-source",
+                domain="example.com",
+                status=SourceStatus.manual_only,
+            )
+            db.add(source)
+            db.commit()
+            db.refresh(source)
+
+            task = crawl_runner.run_source_crawl(db, source.id, task_type="manual_crawl")
+            item = (
+                db.query(IntelligenceItem)
+                .filter(IntelligenceItem.source_url == "https://example.com/translated-coating")
+                .first()
+            )
+
+            assert task.inserted_count == 1
+            assert item is not None
+            assert item.title == "\u6d82\u5e03"
+            assert "\u96c6\u6d41\u4f53" in item.summary
+            assert "coating" not in item.summary.lower()
+
 def test_single_page_crawler_respects_robots_and_extracts_detail(monkeypatch) -> None:
     from app.services.crawlers.compliance import ComplianceResult
     from app.services.crawlers.web import SinglePageCrawler

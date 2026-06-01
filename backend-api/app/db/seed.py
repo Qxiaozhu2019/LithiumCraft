@@ -56,19 +56,18 @@ DEFAULT_SOURCES = [
 ]
 
 PROCESS_PAGE_SOURCES = [
-    ("??", "Neware - Slurry Preparation", "https://www.neware.net/support/slurry-preparation-manufacturing-process-terminology/217/497.html"),
-    ("??", "Neware - Coating", "https://www.neware.net/support/coating-manufacturing-process-terminology/217/499.html"),
-    ("??", "Neware - Roll Pressing", "https://www.neware.net/support/roll-pressing-manufacturing-process-terminology/217/503.html"),
-    ("??", "Neware - Electrode Slitting Machine", "https://www.neware.net/support/electrode-slitting-machine-manufacturing-equipment-terminology/218/541.html"),
-    ("??/??", "Neware - Winding", "https://www.neware.net/support/winding-manufacturing-process-terminology/217/508.html"),
-    ("??/??", "Neware - Stacking", "https://www.neware.net/support/stacking-manufacturing-process-terminology/217/509.html"),
-    ("??", "Neware - Inserting Can", "https://www.neware.net/support/inserting-can-manufacturing-process-terminology/217/521.html"),
-    ("??", "Neware - Electrolyte Injection", "https://www.neware.net/support/electrolyte-injection-manufacturing-process-terminology/217/529.html"),
-    ("??", "Neware - Formation", "https://www.neware.net/support/formation-manufacturing-process-terminology/217/530.html"),
-    ("??", "Neware - Capacity Grading Machine", "https://www.neware.net/support/capacity-grading-machine-manufacturing-equipment-terminology/218/587.html"),
-    ("??", "Neware - X-ray Detection", "https://www.neware.net/support/x-ray-detection-manufacturing-process-terminology/217/518.html"),
+    ("\u5236\u6d46", "Neware - \u5236\u6d46", "https://www.neware.net/support/slurry-preparation-manufacturing-process-terminology/217/497.html"),
+    ("\u6d82\u5e03", "Neware - \u6d82\u5e03", "https://www.neware.net/support/coating-manufacturing-process-terminology/217/499.html"),
+    ("\u8f8a\u538b", "Neware - \u8f8a\u538b", "https://www.neware.net/support/roll-pressing-manufacturing-process-terminology/217/503.html"),
+    ("\u5206\u5207", "Neware - \u6781\u7247\u5206\u5207\u8bbe\u5907", "https://www.neware.net/support/electrode-slitting-machine-manufacturing-equipment-terminology/218/541.html"),
+    ("\u5377\u7ed5/\u53e0\u7247", "Neware - \u5377\u7ed5", "https://www.neware.net/support/winding-manufacturing-process-terminology/217/508.html"),
+    ("\u5377\u7ed5/\u53e0\u7247", "Neware - \u53e0\u7247", "https://www.neware.net/support/stacking-manufacturing-process-terminology/217/509.html"),
+    ("\u88c5\u914d", "Neware - \u5165\u58f3", "https://www.neware.net/support/inserting-can-manufacturing-process-terminology/217/521.html"),
+    ("\u6ce8\u6db2", "Neware - \u6ce8\u6db2", "https://www.neware.net/support/electrolyte-injection-manufacturing-process-terminology/217/529.html"),
+    ("\u5316\u6210", "Neware - \u5316\u6210", "https://www.neware.net/support/formation-manufacturing-process-terminology/217/530.html"),
+    ("\u5206\u5bb9", "Neware - \u5206\u5bb9\u8bbe\u5907", "https://www.neware.net/support/capacity-grading-machine-manufacturing-equipment-terminology/218/587.html"),
+    ("\u68c0\u6d4b", "Neware - X-ray \u68c0\u6d4b", "https://www.neware.net/support/x-ray-detection-manufacturing-process-terminology/217/518.html"),
 ]
-
 DEFAULT_SOURCES.extend(
     {
         "name": name,

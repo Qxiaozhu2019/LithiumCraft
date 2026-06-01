@@ -9,6 +9,7 @@ from app.models.intelligence import IntelligenceItem, IntelligenceStatus
 from app.models.source import Source, SourceStatus
 from app.services.ai import AIAdapter
 from app.services.crawlers import crawl_source
+from app.services.material_translation import translate_process_material
 from app.services.process_stages import is_process_related, match_process_stages
 from app.services.publish import PublishGuard
 from app.services.text import normalize_title
@@ -36,18 +37,21 @@ def run_source_crawl(db: Session, source_id: int, task_type: str = "scheduled_cr
         guard = PublishGuard(db)
         task.fetched_count = len(items)
         for item in items:
-            if not is_process_related(item.title, item.content):
+            translated = translate_process_material(item.title, item.content)
+            title = translated.title
+            content = translated.content
+            if not is_process_related(title, content):
                 task.blocked_count += 1
                 continue
-            analysis = ai.analyze(item.title, item.content)
-            stage_tags = [stage.name for stage in match_process_stages(item.title, item.content)]
+            analysis = ai.analyze(title, content)
+            stage_tags = [stage.name for stage in match_process_stages(title, content)]
             tags = list(dict.fromkeys([*analysis.tags, *stage_tags]))
-            decision = guard.evaluate(title=item.title, content=item.content, source_url=item.url)
+            decision = guard.evaluate(title=title, content=content, source_url=item.url)
             record = IntelligenceItem(
-                title=item.title,
-                normalized_title=normalize_title(item.title),
+                title=title,
+                normalized_title=normalize_title(title),
                 summary=analysis.summary,
-                content_excerpt=item.content[:1000],
+                content_excerpt=content[:1000],
                 source_url=item.url,
                 source_name=source.name,
                 source_id=source.id,

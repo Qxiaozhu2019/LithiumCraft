@@ -21,7 +21,7 @@
         <div>
           <h3>匹配关键词</h3>
           <div class="process-keywords">
-            <el-tag v-for="keyword in stage.keywords" :key="keyword" effect="plain">{{ keyword }}</el-tag>
+            <el-tag v-for="keyword in visibleKeywords" :key="keyword" effect="plain">{{ keyword }}</el-tag>
           </div>
           <p class="process-detail-meta">
             共 {{ stage.item_count }} 条相关公开资料；涉及 {{ stage.source_count }} 个来源；最新更新
@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ElMessage } from "element-plus";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { getProcessStage } from "@/api/client";
@@ -63,6 +63,7 @@ const props = defineProps<{ slug: string }>();
 const router = useRouter();
 const loading = ref(false);
 const stage = ref<ProcessStageDetail | null>(null);
+const visibleKeywords = computed(() => stage.value?.keywords.filter((keyword) => /[\u4e00-\u9fff]/.test(keyword)) || []);
 
 async function load() {
   loading.value = true;
