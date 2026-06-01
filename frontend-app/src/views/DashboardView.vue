@@ -1,85 +1,88 @@
 <template>
-  <div class="home-page page-stack">
-    <section class="home-hero">
-      <div class="home-hero-copy">
-        <p class="eyebrow">Lithium News</p>
+  <article class="news-home">
+    <header class="news-masthead">
+      <div>
+        <p class="news-brand">LithiumCraft</p>
         <h1>锂电资讯</h1>
-        <p class="home-hero-summary">追踪公开来源中的产业政策、材料工艺、储能应用与企业动态，只展示经过合规检查的信息。</p>
+        <p>追踪公开来源中的产业政策、材料工艺、储能应用与企业动态，只展示经过合规检查的信息。</p>
+      </div>
+      <RouterLink v-if="!authStore.isAuthenticated.value" class="news-login-link" to="/login">管理登录</RouterLink>
+    </header>
+
+    <section class="news-section">
+      <div class="news-section-title">
+        <div>
+          <span>Latest Updates</span>
+          <h2>最新资讯</h2>
+        </div>
+        <el-button size="small" text @click="refresh" :loading="loading">刷新</el-button>
+      </div>
+
+      <div v-if="loading && !latest.length" class="news-empty">正在加载公开信息...</div>
+
+      <template v-else-if="headline">
+        <RouterLink class="news-lead" :to="`/intelligence/${headline.id}`">
+          <span class="news-kicker">头条</span>
+          <h3>{{ displayText(headline.title) }}</h3>
+          <p>{{ previewText(headline) }}</p>
+          <div class="news-meta">
+            <span>{{ displayText(headline.source_name) }}</span>
+            <span>{{ displayText(headline.category || "综合") }}</span>
+            <span>{{ formatDateTime(headline.source_published_at || headline.crawled_at) }}</span>
+          </div>
+        </RouterLink>
+
+        <div class="news-list">
+          <RouterLink v-for="item in secondaryItems" :key="item.id" class="news-list-item" :to="`/intelligence/${item.id}`">
+            <div>
+              <h3>{{ displayText(item.title) }}</h3>
+              <p>{{ previewText(item) }}</p>
+              <div class="news-meta">
+                <span>{{ displayText(item.source_name) }}</span>
+                <span>{{ displayText(item.category || "综合") }}</span>
+                <span>{{ formatDateTime(item.source_published_at || item.crawled_at) }}</span>
+              </div>
+            </div>
+          </RouterLink>
+        </div>
+
+        <RouterLink class="news-more" to="/intelligence">查看全部资讯</RouterLink>
+      </template>
+
+      <div v-else class="news-empty">
+        <strong>暂无资讯</strong>
+        <p>等待每日 07:00 自动更新，或管理员登录后手动更新。</p>
       </div>
     </section>
 
-    <div class="home-flow">
-      <section class="home-section">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Latest Updates</p>
-            <h2>最新资讯</h2>
-          </div>
-          <div class="section-actions">
-            <el-button size="small" text @click="refresh" :loading="loading">刷新</el-button>
-            <RouterLink class="section-link" to="/intelligence">查看全部</RouterLink>
-          </div>
+    <section class="news-section">
+      <div class="news-section-title">
+        <div>
+          <span>Daily Brief</span>
+          <h2>每日简报</h2>
         </div>
+      </div>
 
-        <div v-if="loading && !latest.length" class="home-loading-card">正在加载公开信息...</div>
+      <div v-if="briefs.length" class="brief-paper-list">
+        <RouterLink v-for="brief in briefs" :key="brief.id" to="/daily-briefs" class="brief-paper-item">
+          <span>{{ brief.brief_date }} · {{ brief.status }}</span>
+          <strong>{{ displayText(brief.title) }}</strong>
+          <p>{{ displayText(brief.overview || "暂无总览") }}</p>
+        </RouterLink>
+      </div>
+      <div v-else class="news-empty align-left">
+        <strong>暂无简报</strong>
+        <p>更新完成后将生成每日简报。</p>
+      </div>
 
-        <template v-else-if="headline">
-          <RouterLink class="headline-card" :to="`/intelligence/${headline.id}`">
-            <span class="headline-kicker">头条</span>
-            <h3>{{ displayText(headline.title) }}</h3>
-            <p>{{ previewText(headline) }}</p>
-            <div class="article-meta">
-              <span>{{ displayText(headline.source_name) }}</span>
-              <span>{{ displayText(headline.category || "综合") }}</span>
-              <span>{{ formatDateTime(headline.source_published_at || headline.crawled_at) }}</span>
-            </div>
-          </RouterLink>
+      <RouterLink class="news-more" to="/daily-briefs">更多简报</RouterLink>
+    </section>
 
-          <div class="headline-list">
-            <RouterLink v-for="item in secondaryItems" :key="item.id" class="headline-list-item" :to="`/intelligence/${item.id}`">
-              <div>
-                <h3>{{ displayText(item.title) }}</h3>
-                <p>{{ previewText(item) }}</p>
-              </div>
-              <span>{{ displayText(item.source_name) }}</span>
-            </RouterLink>
-          </div>
-        </template>
-
-        <div v-else class="home-empty-state">
-          <strong>暂无资讯</strong>
-          <p>等待每日 07:00 自动更新，或管理员登录后手动更新。</p>
-        </div>
-      </section>
-
-      <section class="home-section">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Daily Brief</p>
-            <h2>每日简报</h2>
-          </div>
-          <RouterLink class="section-link" to="/daily-briefs">更多</RouterLink>
-        </div>
-
-        <div v-if="briefs.length" class="home-brief-list">
-          <RouterLink v-for="brief in briefs" :key="brief.id" to="/daily-briefs" class="home-brief-card">
-            <span>{{ brief.brief_date }} · {{ brief.status }}</span>
-            <strong>{{ displayText(brief.title) }}</strong>
-            <p>{{ displayText(brief.overview || "暂无总览") }}</p>
-          </RouterLink>
-        </div>
-        <div v-else class="home-empty-state compact">
-          <strong>暂无简报</strong>
-          <p>更新完成后将生成每日简报。</p>
-        </div>
-      </section>
-
-      <section class="home-compliance-card">
-        <strong>内容边界</strong>
-        <p>仅展示公开来源中的摘要、链接和必要说明，不绕过登录、付费墙、验证码或 robots 限制。公开内容页可继续查看完整列表和历史简报。</p>
-      </section>
-    </div>
-  </div>
+    <footer class="news-footnote">
+      <strong>内容边界</strong>
+      <span>仅展示公开来源中的摘要、链接和必要说明，不绕过登录、付费墙、验证码或 robots 限制。</span>
+    </footer>
+  </article>
 </template>
 
 <script setup lang="ts">
@@ -88,6 +91,7 @@ import { computed, onMounted, ref } from "vue";
 
 import { listDailyBriefs, listIntelligence } from "@/api/client";
 import type { DailyBrief, IntelligenceItem } from "@/api/types";
+import { authStore } from "@/stores/auth";
 
 const loading = ref(false);
 const latest = ref<IntelligenceItem[]>([]);

@@ -53,8 +53,8 @@
     </el-container>
   </el-container>
 
-  <div v-else class="portal-shell">
-    <header class="portal-topbar">
+  <div v-else :class="['portal-shell', { 'portal-shell-home': isPublicHome }]">
+    <header v-if="!isPublicHome" class="portal-topbar">
       <RouterLink to="/" class="portal-brand">
         <span>LC</span>
         <div>
@@ -68,19 +68,21 @@
       <RouterLink class="portal-login" to="/login">管理登录</RouterLink>
     </header>
 
-    <main class="portal-main">
+    <main :class="['portal-main', { 'portal-main-home': isPublicHome }]">
       <RouterView />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { authStore } from "@/stores/auth";
 
 const route = useRoute();
 const router = useRouter();
+const isPublicHome = computed(() => route.path === "/");
 
 function handleCommand(command: string) {
   if (command === "logout") {
