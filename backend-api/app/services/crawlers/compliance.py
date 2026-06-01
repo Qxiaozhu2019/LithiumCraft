@@ -42,6 +42,7 @@ class ComplianceChecker:
         self._robots_cache: dict[str, robotparser.RobotFileParser] = {}
         self._last_request_at: dict[str, float] = {}
         self._crawl_delay_cache: dict[str, float | None] = {}
+        self._robots_available: dict[str, bool] = {}
 
     def validate_source(self, source: Source) -> ComplianceResult:
         if source.status in {SourceStatus.enabled, SourceStatus.manual_only}:
@@ -53,6 +54,8 @@ class ComplianceChecker:
             return ComplianceResult(False, f"restricted_url:{purpose}:{url}")
 
         parser = self._robots_for_url(url, source)
+        if not self._robots_available.get(self._cache_key(url, source), True):
+            return ComplianceResult(False, f"robots_unavailable:{purpose}:{url}")
         if not parser.can_fetch(settings.CRAWLER_USER_AGENT, url):
             return ComplianceResult(False, f"robots_disallow:{purpose}:{url}")
         return ComplianceResult(True)
@@ -87,9 +90,16 @@ class ComplianceChecker:
         parser = robotparser.RobotFileParser()
         parser.set_url(robots_url)
         try:
-            parser.read()
+            response = httpx.get(robots_url, headers={"User-Agent": settings.CRAWLER_USER_AGENT}, timeout=12)
+            if response.status_code >= 500:
+                self._robots_available[key] = False
+                parser.disallow_all = True
+            else:
+                parser.parse(response.text.splitlines() if response.status_code < 400 else [])
+                self._robots_available[key] = True
         except Exception:
-            pass
+            self._robots_available[key] = False
+            parser.disallow_all = True
         self._robots_cache[key] = parser
         self._crawl_delay_cache[key] = parser.crawl_delay(settings.CRAWLER_USER_AGENT)
         return parser

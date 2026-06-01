@@ -55,6 +55,32 @@ DEFAULT_SOURCES = [
     },
 ]
 
+PROCESS_PAGE_SOURCES = [
+    ("??", "Neware - Slurry Preparation", "https://www.neware.net/support/slurry-preparation-manufacturing-process-terminology/217/497.html"),
+    ("??", "Neware - Coating", "https://www.neware.net/support/coating-manufacturing-process-terminology/217/499.html"),
+    ("??", "Neware - Roll Pressing", "https://www.neware.net/support/roll-pressing-manufacturing-process-terminology/217/503.html"),
+    ("??", "Neware - Electrode Slitting Machine", "https://www.neware.net/support/electrode-slitting-machine-manufacturing-equipment-terminology/218/541.html"),
+    ("??/??", "Neware - Winding", "https://www.neware.net/support/winding-manufacturing-process-terminology/217/508.html"),
+    ("??/??", "Neware - Stacking", "https://www.neware.net/support/stacking-manufacturing-process-terminology/217/509.html"),
+    ("??", "Neware - Inserting Can", "https://www.neware.net/support/inserting-can-manufacturing-process-terminology/217/521.html"),
+    ("??", "Neware - Electrolyte Injection", "https://www.neware.net/support/electrolyte-injection-manufacturing-process-terminology/217/529.html"),
+    ("??", "Neware - Formation", "https://www.neware.net/support/formation-manufacturing-process-terminology/217/530.html"),
+    ("??", "Neware - Capacity Grading Machine", "https://www.neware.net/support/capacity-grading-machine-manufacturing-equipment-terminology/218/587.html"),
+    ("??", "Neware - X-ray Detection", "https://www.neware.net/support/x-ray-detection-manufacturing-process-terminology/217/518.html"),
+]
+
+DEFAULT_SOURCES.extend(
+    {
+        "name": name,
+        "type": SourceType.webpage,
+        "entry_url": entry_url,
+        "domain": "www.neware.net",
+        "parser_key": "single_page",
+        "notes": f"target_process={process}; source_type=process_terminology; robots_status=pending_manual_review; auto_crawl=false",
+    }
+    for process, name, entry_url in PROCESS_PAGE_SOURCES
+)
+
 REMOVED_DEFAULT_SOURCE_URLS = [
     "https://www.cbea.com/",
 ]
@@ -75,15 +101,17 @@ def seed_defaults(db: Session) -> None:
     for source_data in DEFAULT_SOURCES:
         source = db.query(Source).filter(Source.entry_url == source_data["entry_url"]).first()
         if source is None:
+            data = source_data.copy()
+            parser_key = data.pop("parser_key", "generic")
             db.add(
                 Source(
-                    **source_data,
+                    **data,
                     status=SourceStatus.manual_only,
-                    parser_key="generic",
+                    parser_key=parser_key,
                     crawl_interval_minutes=1440,
                     domain_delay_seconds=5,
-                    max_pages_per_run=10,
-                    daily_limit=20,
+                    max_pages_per_run=1 if parser_key == "single_page" else 10,
+                    daily_limit=1 if parser_key == "single_page" else 20,
                 )
             )
 

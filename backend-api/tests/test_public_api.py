@@ -266,6 +266,58 @@ def test_crawl_runner_only_publishes_process_related_items(monkeypatch) -> None:
             )
 
 
+
+def test_single_page_crawler_respects_robots_and_extracts_detail(monkeypatch) -> None:
+    from app.services.crawlers.compliance import ComplianceResult
+    from app.services.crawlers.web import SinglePageCrawler
+
+    class FakeChecker:
+        def validate_source(self, source: Source) -> ComplianceResult:
+            return ComplianceResult(True)
+
+        def can_fetch(self, source: Source, url: str, purpose: str = "page") -> ComplianceResult:
+            return ComplianceResult(True)
+
+        def throttle(self, source: Source, url: str | None = None) -> None:
+            return None
+
+    class FakeResponse:
+        url = "https://example.com/process-page"
+        headers = {"content-type": "text/html"}
+        text = """
+        <html><head><meta name="description" content="Battery coating process summary"></head>
+        <body><h1>Coating manufacturing process</h1><p>Lithium-ion battery electrode coating controls thickness and drying.</p></body></html>
+        """
+
+        def raise_for_status(self) -> None:
+            return None
+
+    class FakeClient:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, url: str):
+            return FakeResponse()
+
+    monkeypatch.setattr("app.services.crawlers.web.http_client", lambda: FakeClient())
+
+    source = Source(
+        name="single page",
+        type=SourceType.webpage,
+        entry_url="https://example.com/process-page",
+        domain="example.com",
+        status=SourceStatus.manual_only,
+        parser_key="single_page",
+    )
+    items = SinglePageCrawler(FakeChecker()).crawl(source)
+
+    assert len(items) == 1
+    assert items[0].title == "Coating manufacturing process"
+    assert "Lithium-ion battery electrode coating" in items[0].content
+
 def test_robots_disallow_marks_source_blocked_by_policy(monkeypatch) -> None:
     from app.services import crawl_runner
 
