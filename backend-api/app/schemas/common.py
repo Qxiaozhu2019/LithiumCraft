@@ -97,12 +97,24 @@ class ProcessStageRead(BaseModel):
     name: str
     description: str
     keywords: list[str]
+    diagram_steps: list[str]
     item_count: int
     latest_crawled_at: datetime | None
 
 
+class ProcessImageRead(BaseModel):
+    title: str
+    alt: str
+    image_url: str
+    source_url: str | None = None
+    source_name: str
+    is_local: bool = True
+
+
 class ProcessStageDetail(ProcessStageRead):
     items: list[IntelligenceRead]
+    images: list[ProcessImageRead]
+    source_count: int
 
 
 class DailyBriefRead(BaseModel):

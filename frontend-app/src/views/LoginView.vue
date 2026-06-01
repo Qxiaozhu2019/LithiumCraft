@@ -2,8 +2,8 @@
   <main class="login-screen">
     <section class="login-hero">
       <p class="eyebrow">LithiumCraft MVP</p>
-      <h1>锂电资讯后台管理入口。</h1>
-      <p>登录后维护公开来源、更新任务、系统参数和每日简报。</p>
+      <h1>锂电工艺后台管理入口。</h1>
+      <p>登录后维护公开来源、抓取任务、系统参数和工艺资料摘要。</p>
       <div class="signal-board">
         <span>公开来源</span>
         <span>低频抓取</span>

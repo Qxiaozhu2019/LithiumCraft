@@ -1,6 +1,6 @@
 <template>
   <div class="page-stack">
-    <PageHeader eyebrow="Information Detail" :title="item?.title || '资讯详情'" description="查看摘要、来源、合规原因并打开原文。">
+    <PageHeader eyebrow="Process Material" :title="item?.title || '工艺资料详情'" description="查看摘要、来源、合规原因并打开原文。">
       <el-button @click="router.back()">返回</el-button>
       <el-button v-if="item" type="primary" plain @click="openSource">打开原文</el-button>
     </PageHeader>
@@ -24,7 +24,7 @@
         </el-col>
         <el-col :xs="24" :lg="8">
           <el-card class="panel-card" shadow="never">
-            <template #header>{{ authStore.isAuthenticated.value ? "操作与属性" : "资讯属性" }}</template>
+            <template #header>{{ authStore.isAuthenticated.value ? "操作与属性" : "资料属性" }}</template>
             <el-descriptions :column="1" border>
               <el-descriptions-item label="分类">{{ item.category }}</el-descriptions-item>
               <el-descriptions-item label="标签">{{ splitTags(item.tags).join(" / ") || "无" }}</el-descriptions-item>
@@ -40,7 +40,7 @@
         </el-col>
       </el-row>
     </template>
-    <el-empty v-else description="资讯不存在" />
+    <el-empty v-else description="资料不存在" />
   </div>
 </template>
 
@@ -66,7 +66,7 @@ async function load() {
   try {
     item.value = await getIntelligence(Number(props.id));
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "资讯详情加载失败");
+    ElMessage.error(err instanceof Error ? err.message : "工艺资料加载失败");
   } finally {
     loading.value = false;
   }

@@ -103,6 +103,16 @@ def test_public_intelligence_only_exposes_active_items() -> None:
 def test_process_stage_api_matches_crawled_content() -> None:
     with TestClient(app) as client:
         with SessionLocal() as db:
+            source = Source(
+                name="公开工艺来源",
+                type=SourceType.webpage,
+                entry_url="https://example.com/process-source",
+                domain="example.com",
+                status=SourceStatus.manual_only,
+            )
+            db.add(source)
+            db.commit()
+            db.refresh(source)
             item = IntelligenceItem(
                 title="涂布厚度一致性控制公开资料",
                 normalized_title="涂布厚度一致性控制公开资料",
@@ -110,6 +120,7 @@ def test_process_stage_api_matches_crawled_content() -> None:
                 content_excerpt="涂布工艺关注浆料流变、干燥温度和极片厚度。",
                 source_url="https://example.com/process-coating",
                 source_name="公开工艺来源",
+                source_id=source.id,
                 source_published_at=datetime.now(timezone.utc),
                 category="制造工艺",
                 tags="涂布,极片,干燥",
@@ -125,8 +136,12 @@ def test_process_stage_api_matches_crawled_content() -> None:
     coating = next(stage for stage in list_response.json() if stage["slug"] == "coating")
     assert coating["item_count"] >= 1
     assert detail_response.status_code == 200
-    assert detail_response.json()["name"] == "涂布"
-    assert any("涂布厚度" in item["title"] for item in detail_response.json()["items"])
+    detail = detail_response.json()
+    assert detail["name"] == "涂布"
+    assert detail["diagram_steps"]
+    assert detail["images"][0]["is_local"] is True
+    assert detail["source_count"] >= 1
+    assert any("涂布厚度" in item["title"] for item in detail["items"])
 
 
 def test_public_search_includes_excerpt_and_tags() -> None:
@@ -202,6 +217,53 @@ def test_manual_crawl_endpoint_runs_without_redis(monkeypatch) -> None:
     assert payload["status"] == "success"
     assert payload["fetched_count"] == 1
     assert payload["inserted_count"] + payload["blocked_count"] == 1
+
+
+def test_crawl_runner_only_publishes_process_related_items(monkeypatch) -> None:
+    from app.services import crawl_runner
+    from app.services.crawlers.base import CrawledItem
+
+    monkeypatch.setattr(
+        crawl_runner,
+        "crawl_source",
+        lambda source: [
+            CrawledItem(
+                title="企业融资普通新闻",
+                url="https://example.com/non-process-news",
+                content="这是一条企业融资新闻，不包含电芯制造工序资料。",
+            ),
+            CrawledItem(
+                title="涂布干燥窗口控制公开资料",
+                url="https://example.com/process-coating-only",
+                content="锂电池极片涂布工艺关注面密度、干燥窗口、厚度一致性和缺陷控制，适合归入制造工艺资料。",
+            ),
+        ],
+    )
+
+    with TestClient(app):
+        with SessionLocal() as db:
+            source = Source(
+                name="工艺过滤测试来源",
+                type=SourceType.webpage,
+                entry_url="https://example.com/process-filter",
+                domain="example.com",
+                status=SourceStatus.manual_only,
+            )
+            db.add(source)
+            db.commit()
+            db.refresh(source)
+
+            task = crawl_runner.run_source_crawl(db, source.id, task_type="manual_crawl")
+
+            assert task.fetched_count == 2
+            assert task.inserted_count == 1
+            assert task.blocked_count == 1
+            assert (
+                db.query(IntelligenceItem)
+                .filter(IntelligenceItem.source_url == "https://example.com/non-process-news")
+                .first()
+                is None
+            )
 
 
 def test_robots_disallow_marks_source_blocked_by_policy(monkeypatch) -> None:

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.intelligence import IntelligenceItem
-from app.schemas import ProcessStageDetail, ProcessStageRead
+from app.schemas import ProcessImageRead, ProcessStageDetail, ProcessStageRead
 from app.services.process_stages import PROCESS_STAGES, get_process_stage, latest_crawled_at, process_stage_query
 
 router = APIRouter()
@@ -20,6 +20,7 @@ def list_processes(db: Session = Depends(get_db)) -> list[ProcessStageRead]:
                 name=stage.name,
                 description=stage.description,
                 keywords=list(stage.keywords),
+                diagram_steps=list(stage.diagram_steps),
                 item_count=query.count(),
                 latest_crawled_at=latest_crawled_at(query),
             )
@@ -44,7 +45,18 @@ def get_process(
         name=stage.name,
         description=stage.description,
         keywords=list(stage.keywords),
+        diagram_steps=list(stage.diagram_steps),
         item_count=query.count(),
         latest_crawled_at=latest_crawled_at(query),
         items=items,
+        images=[
+            ProcessImageRead(
+                title=f"{stage.name}工艺示意图",
+                alt=f"{stage.name}工序站内原创流程示意图",
+                image_url=f"local://process-diagram/{stage.slug}",
+                source_name="LithiumCraft 站内示意图",
+                is_local=True,
+            )
+        ],
+        source_count=len({item.source_id for item in items if item.source_id is not None}),
     )

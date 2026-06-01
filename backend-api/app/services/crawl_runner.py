@@ -9,6 +9,7 @@ from app.models.intelligence import IntelligenceItem, IntelligenceStatus
 from app.models.source import Source, SourceStatus
 from app.services.ai import AIAdapter
 from app.services.crawlers import crawl_source
+from app.services.process_stages import is_process_related, match_process_stages
 from app.services.publish import PublishGuard
 from app.services.text import normalize_title
 
@@ -35,7 +36,12 @@ def run_source_crawl(db: Session, source_id: int, task_type: str = "scheduled_cr
         guard = PublishGuard(db)
         task.fetched_count = len(items)
         for item in items:
+            if not is_process_related(item.title, item.content):
+                task.blocked_count += 1
+                continue
             analysis = ai.analyze(item.title, item.content)
+            stage_tags = [stage.name for stage in match_process_stages(item.title, item.content)]
+            tags = list(dict.fromkeys([*analysis.tags, *stage_tags]))
             decision = guard.evaluate(title=item.title, content=item.content, source_url=item.url)
             record = IntelligenceItem(
                 title=item.title,
@@ -46,8 +52,8 @@ def run_source_crawl(db: Session, source_id: int, task_type: str = "scheduled_cr
                 source_name=source.name,
                 source_id=source.id,
                 source_published_at=item.source_published_at,
-                category=analysis.category,
-                tags=",".join(analysis.tags),
+                category="制造工艺",
+                tags=",".join(tags[:8]),
                 importance_score=analysis.importance_score,
                 status=IntelligenceStatus.active if decision.allowed else IntelligenceStatus.blocked,
                 block_reason=decision.reason or None,
@@ -70,9 +76,9 @@ def run_source_crawl(db: Session, source_id: int, task_type: str = "scheduled_cr
         db.rollback()
         source.failure_count += 1
         source.last_error = str(exc)
-        if source.last_error == "robots_disallow":
+        if source.last_error.startswith("robots_disallow"):
             source.status = SourceStatus.blocked_by_policy
-            source.notes = "robots.txt 禁止抓取，已自动标记为禁止策略状态。"
+            source.notes = f"robots.txt 禁止抓取，已自动标记为禁止策略状态。拒绝地址：{source.last_error}"
         task.status = TaskStatus.failed
         task.error_message = str(exc)
     finally:

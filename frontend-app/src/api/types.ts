@@ -134,10 +134,22 @@ export interface ProcessStage {
   name: string;
   description: string;
   keywords: string[];
+  diagram_steps: string[];
   item_count: number;
   latest_crawled_at: string | null;
 }
 
+export interface ProcessImage {
+  title: string;
+  alt: string;
+  image_url: string;
+  source_url: string | null;
+  source_name: string;
+  is_local: boolean;
+}
+
 export interface ProcessStageDetail extends ProcessStage {
   items: IntelligenceItem[];
+  images: ProcessImage[];
+  source_count: number;
 }

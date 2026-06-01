@@ -9,17 +9,30 @@
     </PageHeader>
 
     <el-card v-if="stage" class="panel-card" shadow="never">
-      <template #header>匹配关键词</template>
-      <div class="process-keywords">
-        <el-tag v-for="keyword in stage.keywords" :key="keyword" effect="plain">{{ keyword }}</el-tag>
+      <template #header>工序概览</template>
+      <div class="process-detail-grid">
+        <div class="process-diagram" :aria-label="stage.images[0]?.alt || `${stage.name}工艺示意图`">
+          <div class="process-diagram-title">{{ stage.name }}流程示意</div>
+          <div class="process-diagram-steps">
+            <span v-for="step in stage.diagram_steps" :key="step">{{ step }}</span>
+          </div>
+          <p>{{ stage.images[0]?.source_name || "LithiumCraft 站内示意图" }}，用于辅助理解工序关系。</p>
+        </div>
+        <div>
+          <h3>匹配关键词</h3>
+          <div class="process-keywords">
+            <el-tag v-for="keyword in stage.keywords" :key="keyword" effect="plain">{{ keyword }}</el-tag>
+          </div>
+          <p class="process-detail-meta">
+            共 {{ stage.item_count }} 条相关公开资料；涉及 {{ stage.source_count }} 个来源；最新更新
+            {{ formatDate(stage.latest_crawled_at) }}
+          </p>
+        </div>
       </div>
-      <p class="process-detail-meta">
-        共 {{ stage.item_count }} 条相关公开资料；最新更新 {{ formatDate(stage.latest_crawled_at) }}
-      </p>
     </el-card>
 
     <el-card class="panel-card" shadow="never">
-      <template #header>相关公开资料</template>
+      <template #header>相关工艺资料</template>
       <div v-if="loading" class="process-empty">正在加载相关资料...</div>
       <div v-else-if="stage?.items.length" class="process-update-list">
         <RouterLink v-for="item in stage.items" :key="item.id" class="process-update-item" :to="`/intelligence/${item.id}`">

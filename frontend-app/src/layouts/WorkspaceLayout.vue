@@ -5,7 +5,7 @@
         <span>LC</span>
         <div>
           <strong>LithiumCraft</strong>
-          <small>锂电资讯</small>
+          <small>锂电工艺知识库</small>
         </div>
       </RouterLink>
 
@@ -13,8 +13,8 @@
       <el-menu :default-active="route.path" router class="workspace-menu">
         <el-menu-item index="/">首页</el-menu-item>
         <el-menu-item index="/processes">制造工艺</el-menu-item>
-        <el-menu-item index="/intelligence">资讯列表</el-menu-item>
-        <el-menu-item index="/daily-briefs">每日简报</el-menu-item>
+        <el-menu-item index="/intelligence">资料检索</el-menu-item>
+        <el-menu-item index="/daily-briefs">资料摘要</el-menu-item>
       </el-menu>
 
       <p class="menu-section admin-section">后台管理</p>
@@ -34,7 +34,7 @@
       <el-header class="workspace-topbar">
         <div>
           <span class="pulse-dot"></span>
-          <span>锂电资讯 · 后台已登录</span>
+          <span>锂电工艺知识库 · 后台已登录</span>
         </div>
         <el-dropdown @command="handleCommand">
           <button class="user-chip">
@@ -60,7 +60,7 @@
         <span>LC</span>
         <div>
           <strong>LithiumCraft</strong>
-          <small>锂电资讯</small>
+          <small>锂电工艺知识库</small>
         </div>
       </RouterLink>
       <nav class="portal-nav">

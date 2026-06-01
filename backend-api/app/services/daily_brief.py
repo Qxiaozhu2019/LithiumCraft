@@ -23,11 +23,11 @@ def generate_daily_brief(db: Session, target_date: date | None = None) -> DailyB
     for item in items:
         grouped[item.category].append(item.title)
     category_summary = {key: value[:5] for key, value in grouped.items()}
-    overview = f"今日新增 {len(items)} 条锂电投研情报。" if items else "今日暂无新增情报。"
+    overview = f"今日新增 {len(items)} 条锂电工艺资料。" if items else "今日暂无新增工艺资料。"
 
     brief = db.query(DailyBrief).filter(DailyBrief.brief_date == target_date).first()
     if brief is None:
-        brief = DailyBrief(brief_date=target_date, title=f"{target_date.isoformat()} 锂电投研摘要")
+        brief = DailyBrief(brief_date=target_date, title=f"{target_date.isoformat()} 锂电工艺资料摘要")
         db.add(brief)
     brief.overview = overview
     brief.highlights = json.dumps(highlights, ensure_ascii=False)

@@ -9,7 +9,7 @@ from app.db.session import SessionLocal, init_db
 
 configure_logging()
 
-app = FastAPI(title="LithiumCraft API", version="0.1.0", description="内部锂电投研情报台 API")
+app = FastAPI(title="LithiumCraft API", version="0.1.0", description="锂电池制造工艺知识库 API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

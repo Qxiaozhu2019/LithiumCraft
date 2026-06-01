@@ -1,6 +1,6 @@
 <template>
   <div class="page-stack">
-    <PageHeader eyebrow="Information" title="资讯列表" description="按关键词、分类与日期筛选公开来源沉淀的信息。" />
+    <PageHeader eyebrow="Process Materials" title="工艺资料检索" description="按关键词、分类与日期筛选公开来源沉淀的制造工艺资料。" />
 
     <el-card class="panel-card" shadow="never">
       <el-form class="filter-bar" :model="filters" inline>
@@ -98,7 +98,7 @@ async function load(targetPage = page.value) {
     items.value = result.items;
     total.value = result.total;
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : "资讯列表加载失败");
+    ElMessage.error(err instanceof Error ? err.message : "工艺资料加载失败");
   } finally {
     loading.value = false;
   }

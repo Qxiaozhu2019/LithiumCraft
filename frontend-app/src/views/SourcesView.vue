@@ -9,6 +9,7 @@
         <el-table-column prop="name" label="名称" min-width="180" />
         <el-table-column prop="type" label="类型" width="110" />
         <el-table-column prop="domain" label="域名" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="notes" label="工艺/合规备注" min-width="240" show-overflow-tooltip />
         <el-table-column label="状态" width="130">
           <template #default="{ row }"><StatusPill :status="row.status" /></template>
         </el-table-column>
