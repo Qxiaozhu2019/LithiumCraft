@@ -30,9 +30,12 @@ curl -fsSL https://raw.githubusercontent.com/<your-org>/<your-repo>/<branch>/dep
 bash bootstrap-alinux.sh
 ```
 
-如果代码已经上传到服务器，也可以在项目目录内运行：
+如果服务器不能访问 GitHub，先按“首次部署”的打包上传方式把项目传到 `/opt/lithiumcraft`，再在项目目录内运行：
 
 ```bash
+cd /opt/lithiumcraft
+find deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec sed -i 's/\r$//' {} +
+find deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
 bash deploy/scripts/bootstrap-alinux.sh
 ```
 
@@ -74,6 +77,7 @@ find /opt/lithiumcraft/deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec chm
 创建生产环境配置：
 
 ```bash
+cd /opt/lithiumcraft
 cp deploy/env.production.example .env
 vim .env
 ```
@@ -172,6 +176,33 @@ docker compose -f deploy/docker-compose.yml --env-file .env restart nginx
 
 服务器不要求安装 Git，也不要求能访问 GitHub。日常更新使用本地打包上传：
 
+本地电脑是 Windows、服务器是 Linux 时，推荐直接在本地运行项目自带的一键热更新脚本：
+
+```powershell
+Set-Location 'E:\工作目录\97_AILearning\11_LithiumCraft'
+powershell -ExecutionPolicy Bypass -File deploy\scripts\hot-update.ps1 -HostName 139.224.223.234 -UserName root
+```
+
+脚本会自动完成：
+
+- 本地打包并排除 `.git`、`.env`、依赖、本地 SQLite 和备份目录。
+- 上传包到服务器 `/tmp/lithiumcraft-deploy.tar.gz`。
+- 如果当前 PostgreSQL 容器正在运行，先执行一次 PostgreSQL 备份。
+- 在服务器解压到 `/tmp` 临时目录，确认包结构正确且不包含 `.env`。
+- 清理 `/opt/lithiumcraft` 中旧代码并复制新代码，避免几个月后热更新时残留已删除文件。
+- 校验 `/opt/lithiumcraft/.env` 未被覆盖。
+- 修复 shell 脚本 LF 换行和可执行权限。
+- 运行 `deploy.sh` 重建需要更新的容器。
+- 运行 `verify.sh` 验证首页和 API。
+
+如果确认不需要更新前备份，可追加 `-SkipBackup`：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\scripts\hot-update.ps1 -HostName 139.224.223.234 -UserName root -SkipBackup
+```
+
+如果不用 PowerShell 脚本，也可以手动执行：
+
 ```bash
 # 本地项目根目录
 tar --exclude='.git' \
@@ -184,17 +215,56 @@ tar --exclude='.git' \
 
 scp lithiumcraft-deploy.tar.gz root@139.224.223.234:/tmp/
 
-# 服务器
+# 服务器 Linux
 ssh root@139.224.223.234
 cd /opt/lithiumcraft
-tar -xzf /tmp/lithiumcraft-deploy.tar.gz -C /opt/lithiumcraft
+
+before_env_sum=$(sha256sum .env | awk '{print $1}')
+env_copy=$(mktemp /tmp/lithiumcraft-env.XXXXXX)
+staging_dir=$(mktemp -d /tmp/lithiumcraft-release.XXXXXX)
+trap 'rm -rf "$staging_dir" "$env_copy"' EXIT
+cp .env "$env_copy"
+
 find deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec sed -i 's/\r$//' {} +
 find deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
+if docker compose -f deploy/docker-compose.yml --env-file .env ps --services --status running 2>/dev/null | grep -qx postgres; then
+  bash deploy/scripts/backup-postgres.sh
+else
+  echo "PostgreSQL container is not running; skip pre-update backup."
+fi
+
+tar -xzf /tmp/lithiumcraft-deploy.tar.gz -C "$staging_dir"
+if [ -f "$staging_dir/.env" ]; then
+  echo "Package unexpectedly contains .env; abort."
+  exit 1
+fi
+if [ ! -f "$staging_dir/deploy/scripts/deploy.sh" ]; then
+  echo "Package does not look like a LithiumCraft project root; abort."
+  exit 1
+fi
+
+find "$staging_dir/deploy/scripts" -maxdepth 1 -type f -name '*.sh' -exec sed -i 's/\r$//' {} +
+find "$staging_dir/deploy/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
+if [ -d deploy/backups ]; then
+  mkdir -p "$staging_dir/deploy"
+  cp -a deploy/backups "$staging_dir/deploy/backups"
+fi
+
+find /opt/lithiumcraft -mindepth 1 -maxdepth 1 ! -name '.env' -exec rm -rf -- {} +
+cp -a "$staging_dir/." /opt/lithiumcraft/
+cp "$env_copy" /opt/lithiumcraft/.env
+
+after_env_sum=$(sha256sum .env | awk '{print $1}')
+if [ "$before_env_sum" != "$after_env_sum" ]; then
+  echo ".env changed unexpectedly; abort."
+  exit 1
+fi
+
 bash deploy/scripts/deploy.sh
 bash deploy/scripts/verify.sh
 ```
 
-这个流程会保留：
+一键脚本和手动流程都会清理旧代码文件，但会保留：
 
 - `/opt/lithiumcraft/.env`
 - PostgreSQL volume：`deploy_postgres_data`
