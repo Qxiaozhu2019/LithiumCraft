@@ -76,6 +76,8 @@ cp .env.example .env
 docker compose -f deploy/docker-compose.yml --env-file .env up --build
 ```
 
+Docker Compose 默认使用 PostgreSQL 16 和 Redis 7，统一入口为 `http://localhost:8080`，API 文档为 `http://localhost:8080/docs`。这和上面的本地分离开发不同：分离开发命令为了方便 Windows 联调，显式把后端数据库覆盖为本地 SQLite 文件 `backend-api/lithiumcraft-dev.db`。
+
 ## 测试
 
 后端使用 pytest。前端使用 TypeScript 构建检查。提交前至少运行：

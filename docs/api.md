@@ -33,7 +33,7 @@ The following APIs require an admin Bearer JWT; anonymous access returns 401.
 - `POST /api/v1/crawl-tasks`: manually trigger one source crawl; local/admin runs synchronously and does not require Redis.
 - `POST /api/v1/crawl-tasks/enabled`: manually trigger all `enabled` sources; excludes `manual_only` candidate sources.
 - `GET /api/v1/settings`: system settings.
-- `PATCH /api/v1/settings`: update system settings.
+- `PATCH /api/v1/settings/{key}`: update one system setting by key.
 
 ## Scheduling
 

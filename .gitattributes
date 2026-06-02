@@ -1,0 +1,7 @@
+*.sh text eol=lf
+*.md text
+*.yml text
+*.yaml text
+*.py text
+*.ts text
+*.vue text

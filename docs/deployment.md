@@ -44,19 +44,31 @@ bash deploy/scripts/bootstrap-alinux.sh
 
 ```bash
 mkdir -p /opt/lithiumcraft
-cd /opt/lithiumcraft
-git clone <your-repository-url> .
 ```
 
-没有远程仓库时，可以本地打包上传：
+当前推荐从本地打包上传，不要求服务器能访问 GitHub：
 
 ```bash
-scp lithiumcraft.tar.gz root@139.224.223.234:/opt/
+# 在本地项目根目录执行，排除 Git、依赖、生产 .env、备份和本地开发数据库
+tar --exclude='.git' \
+  --exclude='node_modules' \
+  --exclude='frontend-app/node_modules' \
+  --exclude='.env' \
+  --exclude='backend-api/lithiumcraft-dev.db' \
+  --exclude='deploy/backups' \
+  -czf lithiumcraft-deploy.tar.gz .
+
+scp lithiumcraft-deploy.tar.gz root@139.224.223.234:/tmp/
+```
+
+服务器解压：
+
+```bash
 ssh root@139.224.223.234
-cd /opt
-tar -xzf lithiumcraft.tar.gz
-mv 11_LithiumCraft lithiumcraft
-cd /opt/lithiumcraft
+mkdir -p /opt/lithiumcraft
+tar -xzf /tmp/lithiumcraft-deploy.tar.gz -C /opt/lithiumcraft
+find /opt/lithiumcraft/deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec sed -i 's/\r$//' {} +
+find /opt/lithiumcraft/deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
 ```
 
 创建生产环境配置：
@@ -152,7 +164,48 @@ docker compose -f deploy/docker-compose.yml --env-file .env restart beat
 docker compose -f deploy/docker-compose.yml --env-file .env restart nginx
 ```
 
-升级：
+## 同步与热更新
+
+生产环境没有真正的前后端热更新：前端需要重新构建静态资源，后端镜像需要重新构建或重启容器。这里的“热更新”指在不重装服务器、不删除数据库 volume、不改 `.env` 的情况下，把新代码同步到 `/opt/lithiumcraft`，然后滚动式重建相关容器。
+
+### 推荐方式：本地打包上传
+
+服务器不要求安装 Git，也不要求能访问 GitHub。日常更新使用本地打包上传：
+
+```bash
+# 本地项目根目录
+tar --exclude='.git' \
+  --exclude='node_modules' \
+  --exclude='frontend-app/node_modules' \
+  --exclude='.env' \
+  --exclude='backend-api/lithiumcraft-dev.db' \
+  --exclude='deploy/backups' \
+  -czf lithiumcraft-deploy.tar.gz .
+
+scp lithiumcraft-deploy.tar.gz root@139.224.223.234:/tmp/
+
+# 服务器
+ssh root@139.224.223.234
+cd /opt/lithiumcraft
+tar -xzf /tmp/lithiumcraft-deploy.tar.gz -C /opt/lithiumcraft
+find deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec sed -i 's/\r$//' {} +
+find deploy/scripts -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
+bash deploy/scripts/deploy.sh
+bash deploy/scripts/verify.sh
+```
+
+这个流程会保留：
+
+- `/opt/lithiumcraft/.env`
+- PostgreSQL volume：`deploy_postgres_data`
+- Redis volume：`deploy_redis_data`
+- 备份目录：`deploy/backups`
+
+注意：上传包必须排除 `.env`，否则会丢生产密码和密钥。不要执行 `docker compose down -v` 或 `docker volume prune`，否则可能删除数据库 volume。
+
+### 可选方式：服务器 Git 工作树
+
+只有在服务器已安装 Git 且能访问 GitHub 时，才使用 `git pull` 更新：
 
 ```bash
 cd /opt/lithiumcraft
